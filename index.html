@@ -85,21 +85,24 @@
     .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f1f1f1; padding: 15px; border-radius: 8px; text-align: left;}
     .check-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; cursor: pointer; color: #333; text-transform: none;}
 @media print {
-    /* 1. Ocultar todo lo que hay en la pantalla por defecto */
+    /* 1. Ocultar el sistema, mostrar solo el ticket */
     body * { visibility: hidden !important; }
     .no-print { display: none !important; }
     @page { margin: 0; padding: 0; }
 
-    /* 2. Forzar NEGRO PURO en todo */
+    /* 🔥 2. FORZAR TODO AL TAMAÑO Y GROSOR DEL ENCABEZADO 🔥 */
     .print-active, .print-active * {
         visibility: visible !important;
-        color: #000000 !important;
+        color: #000000 !important; /* Negro purísimo */
         font-family: 'Courier New', Courier, monospace !important;
+        font-weight: 900 !important; /* Grosor máximo (Ultra Black) */
+        font-size: 20px !important; /* Tamaño gigante para todo */
+        line-height: 1.2 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* 3. El secreto térmico: Apagar suavizado y engrosar letra */
+    /* 3. Ajustes de la hoja de 58mm */
     .print-active {
         position: absolute !important;
         left: 0 !important;
@@ -110,19 +113,29 @@
         padding: 0 !important;
         background: #fff !important;
         border: none !important;
-        -webkit-font-smoothing: none !important;
-        text-shadow: 0 0 1px #000 !important; /* 🔥 Engrosa la letra */
     }
 
-    /* 4. Ajustar la tabla */
+    /* 4. Ajustar la tabla para que la letra gigante quepa bien */
     .print-active table { 
         width: 100% !important; 
         table-layout: fixed !important; 
         border-collapse: collapse !important;
     }
+    
+    /* Distribuimos el espacio de las columnas */
+    .print-active th:nth-child(1), .print-active td:nth-child(1) { width: 15% !important; }
+    .print-active th:nth-child(2), .print-active td:nth-child(2) { width: 50% !important; }
+    .print-active th:nth-child(3), .print-active td:nth-child(3) { width: 35% !important; text-align: right !important; }
+
     .print-active th, .print-active td { 
-        padding: 3px 0 !important; 
+        padding: 5px 0 !important; 
         word-wrap: break-word !important; 
+        border-bottom: 2px solid #000 !important; /* Separador grueso entre productos */
+    }
+    
+    /* El encabezado y el total un poquito más grandes nada más */
+    .print-active h2, .print-active .total-gigante {
+        font-size: 26px !important;
     }
 }
 
@@ -495,21 +508,116 @@
 
 <div id="r-tab" class="tabcontent no-print">
     <div style="padding:25px; max-width: 1400px; margin: 0 auto;">
+        
+        <!-- BARRA DE FILTROS -->
         <div style="display:flex; gap:15px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             <div><h3 style="margin:0; color:var(--p)">Filtros:</h3></div>
             <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">FECHA INICIO:</label><input type="date" id="corte_fecha_inicio" onchange="renderCorte()"></div>
             <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">FECHA FIN:</label><input type="date" id="corte_fecha_fin" onchange="renderCorte()"></div>
             <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">CAJERO:</label><select id="corte_cajero" onchange="renderCorte()"><option value="">Todos los cajeros</option></select></div>
-            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">SUCURSAL:</label><select id="corte_sucursal" onchange="renderCorte()"><option value="">Todas (Global)</option><option value="Matriz">Matriz</option><option value="Sucursal 1">Sucursal 1</option><option value="Sucursal 2">Sucursal 2</option></select></div>
+            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">SUCURSAL:</label><select id="corte_sucursal" onchange="renderCorte()"><option value="">Todas (Global)</option></select></div>
             <div style="display: flex; gap:10px;"><button class="btn-search" style="padding: 12px 20px; background:var(--p)" onclick="renderCorte()">📊 ANALIZAR</button></div>
         </div>
-<!-- AQUÍ VAN LOS BOTONES NUEVOS DE GASTOS Y PRECORTE -->
+
         <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;" class="no-print">
-     <button onclick="abrirCancelacionMovimientos()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🗑️ Anular Movimiento</button>
-        </div>
-            
+            <button onclick="abrirCancelacionMovimientos()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🗑️ Anular Movimiento</button>
             <button onclick="registrarPrecorte()" style="background:#17a2b8; color:white; border:none; padding:10px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">✂️ Hacer Precorte</button>
         </div>
+
+        <!-- 🔥 NUEVO: KPI SUMMARY (Igual a la imagen) 🔥 -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
+            <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Ventas Totales</h4>
+                <p id="kpi_ventas" style="color:#007bff; font-size:28px; font-weight:bold; margin:0;">$0.00</p>
+            </div>
+            <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Ganancia Neta</h4>
+                <p id="kpi_ganancia" style="color:#28a745; font-size:28px; font-weight:bold; margin:0;">$0.00</p>
+            </div>
+            <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #6f42c1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:#666; font-size:13px; font-weight:bold;">No. de Ventas:</span>
+                    <span id="kpi_no_ventas" style="color:#333; font-weight:bold;">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#666; font-size:13px; font-weight:bold;">Ticket Promedio:</span>
+                    <span id="kpi_ticket_prom" style="color:#333; font-weight:bold;">$0.00</span>
+                </div>
+            </div>
+            <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #fd7e14; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Margen de Utilidad</h4>
+                <p id="kpi_margen" style="color:#fd7e14; font-size:28px; font-weight:bold; margin:0;">0.00%</p>
+            </div>
+        </div>
+
+        <!-- 🔥 NUEVO: GRÁFICAS PRINCIPALES 🔥 -->
+        <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="margin-top:0; color:var(--p);">📈 Ventas vs Ganancia (Por Día)</h3>
+            <div style="width:100%; height: 300px;"><canvas id="chartVentasDiarias"></canvas></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
+            <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h3 style="margin-top:0; color:var(--p);">📊 Ventas por Departamento</h3>
+                <div style="width:100%; height: 250px;"><canvas id="chartDept"></canvas></div>
+            </div>
+            <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h3 style="margin-top:0; color:var(--p);">👤 Rendimiento por Cajero (%)</h3>
+                <div style="width:100%; height: 250px;"><canvas id="chartCajeros"></canvas></div>
+            </div>
+        </div>
+<!-- 🔥 NUEVO: HORAS PICO Y RENDIMIENTO POR CAJERO 🔥 -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
+            <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h3 style="margin-top:0; color:var(--p);">⏰ Ventas por Hora (Horas Pico)</h3>
+                <div style="width:100%; height: 250px;"><canvas id="chartHoras"></canvas></div>
+            </div>
+            <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y:auto; max-height:330px;">
+                <h3 style="margin-top:0; color:var(--p);">🥇 Desempeño por Cajero</h3>
+                <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #eee; color:#666;">
+                            <th>Cajero</th>
+                            <th>Total Vendido</th>
+                            <th>Ticket Prom.</th>
+                            <th style="color:var(--orange);">Venta / Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpi_tabla_cajeros"></tbody>
+                </table>
+            </div>
+        </div>
+<!-- 🔥 NUEVO: TOP 10 PRODUCTOS 🔥 -->
+        <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="margin-top:0; color:var(--p);">🏆 Top 10 Productos Más Vendidos</h3>
+            <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee; color:#666;">
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 55%;">Producto</th>
+                        <th style="width: 20%;">Cant. Vendida</th>
+                        <th style="width: 20%;">Ingreso Generado</th>
+                    </tr>
+                </thead>
+                <tbody id="kpi_tabla_top_productos"></tbody>
+            </table>
+        </div>
+        <!-- CORTE DE CAJA CLÁSICO (Flujo de Efectivo Físico) -->
+        <div class="dash-card" style="border-top: 5px solid var(--s); margin-bottom: 20px; background: #f8fdf9;">
+            <h3 style="margin-top:0; color:var(--s);">💰 Corte de Caja Físico (Efectivo y Terminal)</h3>
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
+                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e8e1; border-radius:8px;"><h4 style="margin:0; color:#1e8449; font-size:11px;">💵 EFECTIVO EN CAJA</h4><p id="r_efectivo" style="font-size:24px; font-weight:bold; margin:5px 0; color: #1e8449;">$0.00</p></div>
+                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e1e8; border-radius:8px;"><h4 style="margin:0; color:#21618c; font-size:11px;">💳 TARJETA</h4><p id="r_tarjeta" style="font-size:24px; font-weight:bold; margin:5px 0; color: #21618c;">$0.00</p></div>
+                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e8e1e8; border-radius:8px;"><h4 style="margin:0; color:#6f42c1; font-size:11px;">📱 TRANSFERENCIA</h4><p id="r_transferencia" style="font-size:24px; font-weight:bold; margin:5px 0; color: #6f42c1;">$0.00</p></div>
+                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e8e8e1; border-radius:8px;"><h4 style="margin:0; color:#9a7d0a; font-size:11px;">📝 CRÉDITO (FIADO)</h4><p id="r_credito" style="font-size:24px; font-weight:bold; margin:5px 0; color: #9a7d0a;">$0.00</p></div>
+                <div style="text-align:center; padding:15px; background:var(--s); border-radius:8px; color: white;"><h4 style="margin:0; font-size:11px;">🏆 INGRESOS TOTALES</h4><p id="r_total" style="font-size:24px; font-weight:bold; margin:5px 0;">$0.00</p></div>
+            </div>
+        </div>
+
+        <h3 style="color:var(--d)">Detalle de Operaciones</h3>
+        <div style="height: 300px; overflow-y: auto; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"><table class="tabla-pos" style="margin:0;"><thead><tr><th>Fecha / Hora</th><th>Cajero</th><th>Sucursal</th><th>Total</th><th>Método</th><th>Detalle</th></tr></thead><tbody id="r_lista_ventas"></tbody></table></div>
+    </div>
+</div>
         <div class="dash-card" style="border-top: 5px solid var(--s); margin-bottom: 20px; background: #f8fdf9;">
             <h3 style="margin-top:0; color:var(--s); display: flex; justify-content: space-between;"><span>💰 Corte de Caja: <b id="lbl_nombre_cajero">Todos</b></span><span style="font-size: 14px; color: #666;">Filtros activos</span></h3>
             <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
@@ -829,30 +937,30 @@
             <button class="btn-final" style="width:auto; margin:0; padding:8px 15px; background:#444;" onclick="navVisor(1)">Sig ➡️</button>
         </div>
         
-<div id="visor_print_area" style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative; min-height: 200px; background:#fff; text-align: left; flex-shrink: 0;">
-            <div id="visor_sello_anulado" style="display:none; position:absolute; top:30%; left:10%; color:rgba(220,53,69,0.8); border:5px solid rgba(220,53,69,0.8); font-size:35px; font-weight:900; transform:rotate(-25deg); padding:10px; pointer-events:none; text-align:center; width: 80%;">ANULADA</div>
+<div id="visor_print_area" style="padding:0; position:relative; background:#fff; text-align: left; flex-shrink: 0; color:#000; font-family: monospace;">
+            <div id="visor_sello_anulado" style="display:none; position:absolute; top:30%; left:10%; color:#000; border:5px solid #000; font-size:35px; font-weight:900; transform:rotate(-25deg); padding:10px; pointer-events:none; text-align:center; width: 80%;">ANULADA</div>
             
-            <h2 style="margin: 0; font-size:18px; font-weight:900; text-align: center;" id="visor_print_nombre">Mi Tienda</h2>
-            <p style="font-size: 11px; color: #555; margin:5px 0 10px; text-align: center;">COPIA DE COMPROBANTE</p>
-            <div id="visor_fecha" style="font-size: 11px; margin-bottom: 10px;"></div>
+            <h2 style="margin: 0; text-align: center;" id="visor_print_nombre">Mi Tienda</h2>
+            <p style="margin:5px 0 10px; text-align: center;">COPIA DE TICKET</p>
+            <div id="visor_fecha" style="margin-bottom: 10px;"></div>
             
-            <table style="width: 100%; font-size: 11px; text-align: left; border-collapse: collapse; table-layout: fixed; color: #000;">
+            <table style="width: 100%; text-align: left; border-collapse: collapse; table-layout: fixed; color: #000;">
                 <thead>
-                    <tr style="border-bottom: 1px dashed #000;">
-                        <th style="width: 15%; padding-bottom: 3px;">Cant</th>
-                        <th style="width: 55%; padding-bottom: 3px; word-wrap: break-word;">Desc.</th>
-                        <th style="width: 30%; text-align:right; padding-bottom: 3px;">Importe</th>
+                    <tr style="border-bottom: 2px dashed #000;">
+                        <th style="width: 15%; padding-bottom: 3px;">CAN</th>
+                        <th style="width: 50%; padding-bottom: 3px; word-wrap: break-word;">DESC</th>
+                        <th style="width: 35%; text-align:right; padding-bottom: 3px;">IMP</th>
                     </tr>
                 </thead>
                 <tbody id="visor_items"></tbody>
             </table>
             
-            <div style="border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; text-align: right; font-size: 16px;">
+            <div class="total-gigante" style="border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; text-align: right;">
                 <b>TOTAL: $<span id="visor_total">0.00</span></b>
             </div>
-            <div style="text-align: right; font-size: 11px; margin-top: 5px;">
-                Pago: <span id="visor_metodo"></span><br>
-                Atendió: <span id="visor_cajero"></span>
+            <div style="text-align: left; margin-top: 5px;">
+                PAGO: <span id="visor_metodo"></span><br>
+                CAJERO: <span id="visor_cajero"></span>
             </div>
         </div>
         
@@ -880,27 +988,27 @@
             <button class="btn-final" style="width:auto; margin:0; padding:8px 15px; background:#444;" onclick="navVisorCompras(1)">Sig ➡️</button>
         </div>
         
-       <div id="visor_compras_print_area" style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative; min-height: 200px; background:#fff; text-align: left; color: #000; flex-shrink: 0;">
-            <h2 style="margin: 0; font-size:18px; font-weight:900; text-align: center;">Comprobante de Compra</h2>
-            <div id="visor_compras_fecha" style="font-size: 11px; margin-bottom: 10px; text-align:center; margin-top:5px;"></div>
+       <div id="visor_compras_print_area" style="padding:0; position:relative; background:#fff; text-align: left; color: #000; font-family: monospace; flex-shrink: 0;">
+            <h2 style="margin: 0; text-align: center;">COMPRA</h2>
+            <div id="visor_compras_fecha" style="margin-bottom: 10px; text-align:center; margin-top:5px;"></div>
             
-            <div style="font-size:12px; margin-bottom:10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
-                <b>Proveedor:</b> <span id="visor_compras_prov"></span><br>
-                <b>Folio Compra:</b> <span id="visor_compras_folio"></span>
+            <div style="margin-bottom:10px; border-bottom: 2px dashed #000; padding-bottom: 5px;">
+                <b>PROV:</b> <span id="visor_compras_prov"></span><br>
+                <b>FOLIO:</b> <span id="visor_compras_folio"></span>
             </div>
             
-            <table style="width: 100%; font-size: 11px; text-align: left; border-collapse: collapse; table-layout: fixed;">
+            <table style="width: 100%; text-align: left; border-collapse: collapse; table-layout: fixed;">
                 <thead>
-                    <tr style="border-bottom: 1px dashed #000;">
-                        <th style="width: 15%; padding-bottom: 3px;">Cant</th>
-                        <th style="width: 55%; padding-bottom: 3px; word-wrap: break-word;">Desc.</th>
-                        <th style="width: 30%; text-align:right; padding-bottom: 3px;">Costo</th>
+                    <tr style="border-bottom: 2px dashed #000;">
+                        <th style="width: 15%; padding-bottom: 3px;">CAN</th>
+                        <th style="width: 50%; padding-bottom: 3px; word-wrap: break-word;">DESC</th>
+                        <th style="width: 35%; text-align:right; padding-bottom: 3px;">COSTO</th>
                     </tr>
                 </thead>
                 <tbody id="visor_compras_items"></tbody>
             </table>
             
-            <div style="border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; text-align: right; font-size: 16px;">
+            <div class="total-gigante" style="border-top: 2px dashed #000; margin-top: 10px; padding-top: 10px; text-align: right;">
                 <b>TOTAL: $<span id="visor_compras_total">0.00</span></b>
             </div>
         </div>
@@ -1007,7 +1115,7 @@
 <div id="modalBuscar" class="modal">
     <div class="modal-content" style="width:700px; height:80vh; display:flex; flex-direction:column; padding-bottom: 15px;">
         <h3 style="margin-top:0; color:var(--p);">Buscador de Productos</h3>
-        <input type="text" id="b_input" placeholder="🔍 Escribe nombre o código..." onkeyup="buscarProductos()" autocomplete="off" style="font-size:18px; padding:15px; margin-bottom:10px;">
+        <input type="text" id="b_input" placeholder="🔍 Escribe nombre o código..." oninput="buscarProductos()" autocomplete="off" style="font-size:18px; padding:15px; margin-bottom:10px;">
         <div style="overflow-y:auto; flex-grow:1;"><table class="tabla-pos"><thead style="position:sticky; top:0; background:white;"><tr><th>Código</th><th>Nombre</th><th>Stock Disp.</th><th>P. Venta</th></tr></thead><tbody id="b_resultados"></tbody></table></div>
         <button class="btn-final" style="background:#eee; color:#333; margin-top:10px;" onclick="cerrarModales()">CERRAR</button>
     </div>
@@ -1755,18 +1863,34 @@ function calcVentaDesdeGanancia() {
 function calcularEfectivoEnCaja() {
     let hoy = getFechaLocal();
     let ef = 0;
+    
+    // 1. Sumar todas las ventas de la SUCURSAL ACTUAL (sin importar qué cajero cobró)
     ventas.forEach(v => {
-        if(!v.anulada && (v.fecha || hoy) === hoy && v.sucursal === sucursalActual && v.cajero === usuarioActual) {
+        if(!v.anulada && (v.fecha || hoy) === hoy && v.sucursal === sucursalActual) {
             let mStr = v.metodo || '';
-            if(mStr.includes('Efectivo') || mStr.includes('Abono Efectivo')) ef += (v.total || 0);
+            
+            if(mStr.includes('Efectivo')) {
+                // Si la venta tiene pagos divididos, extraemos solo lo que fue en efectivo
+                if (v.pagos && Array.isArray(v.pagos) && v.pagos.length > 0) {
+                    v.pagos.forEach(p => {
+                        if (p.metodo === 'Efectivo') ef += parseFloat(p.montoAplicado) || 0;
+                    });
+                } else {
+                    // Respaldo para ventas antiguas que no estaban divididas
+                    ef += parseFloat(v.total) || 0;
+                }
+            }
         }
     });
+    
+    // 2. Sumar Ingresos y restar Retiros (Gastos y Compras)
     movimientos.forEach(m => {
-        if((m.fecha || hoy) === hoy && m.sucursal === sucursalActual && m.cajero === usuarioActual) {
-            if(m.tipo === 'Ingreso') ef += m.monto;
-            else if(m.tipo === 'Retiro') ef -= m.monto;
+        if((m.fecha || hoy) === hoy && m.sucursal === sucursalActual) {
+            if(m.tipo === 'Ingreso') ef += parseFloat(m.monto) || 0;
+            else if(m.tipo === 'Retiro') ef -= parseFloat(m.monto) || 0;
         }
     });
+    
     return ef;
 }
 
@@ -2348,44 +2472,71 @@ function guardarMovimiento() {
     alert(`✅ ${tipo} de $${monto.toFixed(2)} registrado en caja.`);
 }
 
+
+
+
+// Variables globales para las gráficas
+var chartBarInstance = null;
+var chartDeptInstance = null;
+var chartCajeroInstance = null;
+var chartHorasInstance = null; 
+
 function renderCorte() { 
     try {
-        // 1. Obtener filtros
         let fInicio = document.getElementById('corte_fecha_inicio').value; 
         let fFin = document.getElementById('corte_fecha_fin').value; 
         let fCajero = document.getElementById('corte_cajero').value; 
         let fSuc = document.getElementById('corte_sucursal').value; 
         let hoy = getFechaLocal();
 
-        // Inicializar contadores
-        let ef=0, ta=0, trans=0, cr=0, tGlobalRango=0, tSucursalRango=0, tUtilidad=0; 
-        let prodsHash = {}; let depsHash = {};
+        let ef=0, ta=0, trans=0, cr=0; 
+        let tVentas = 0, tUtilidad = 0, numVentas = 0;
+        
+        let ventasPorDia = {};
+        let utilPorDia = {};
+        let depsHash = {};
+        let cajerosHash = {};
+        let horasHash = {}; 
+        let metricasCajero = {}; 
+        let topProductosHash = {}; // 🔥 Diccionario para el Top 10
 
         if (!ventas || ventas.length === 0) {
-            console.log("No hay ventas cargadas aún.");
-            limpiarTablasDashboard();
+            document.getElementById('r_lista_ventas').innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay ventas en este periodo</td></tr>";
+            document.getElementById('kpi_tabla_top_productos').innerHTML = "<tr><td colspan='4' style='text-align:center'>No hay datos</td></tr>";
             return;
         }
 
-        // 2. Procesar Ventas
         let filteredVentas = ventas.filter(v => {
             let vFecha = v.fecha || hoy;
-            let enRango = (vFecha >= fInicio && vFecha <= fFin);
-            let matchCajero = (!fCajero || v.cajero === fCajero); 
-            let matchSuc = (!fSuc || v.sucursal === fSuc || (fSuc === "Matriz" && !v.sucursal));
-            
-            return enRango && matchCajero && matchSuc;
+            return (vFecha >= fInicio && vFecha <= fFin) && 
+                   (!fCajero || v.cajero === fCajero) && 
+                   (!fSuc || v.sucursal === fSuc || (fSuc === "Matriz" && !v.sucursal));
         });
 
         let htmlVentas = filteredVentas.map(v => {
             if(!v.anulada) {
-                // Suma para las cajas de analíticas (Venta Global)
-                tGlobalRango += parseFloat(v.total) || 0;
-                tSucursalRango += parseFloat(v.total) || 0;
+                numVentas++;
+                let tVentaTicket = parseFloat(v.total) || 0;
+                tVentas += tVentaTicket;
+                
+                let dStr = v.fecha || hoy;
+                let nomCajero = v.cajero || 'Desconocido';
 
-                // --- LÓGICA DE PAGOS MIXTOS ---
+                let fechaObj = new Date(v.id);
+                let horaMilitar = fechaObj.getHours().toString().padStart(2, '0') + ":00"; 
+                horasHash[horaMilitar] = (horasHash[horaMilitar] || 0) + tVentaTicket;
+
+                if (!metricasCajero[nomCajero]) {
+                    metricasCajero[nomCajero] = { total: 0, tickets: 0, horasUnicas: new Set() };
+                }
+                metricasCajero[nomCajero].total += tVentaTicket;
+                metricasCajero[nomCajero].tickets += 1;
+                metricasCajero[nomCajero].horasUnicas.add(dStr + "-" + horaMilitar);
+
+                ventasPorDia[dStr] = (ventasPorDia[dStr] || 0) + tVentaTicket;
+                cajerosHash[nomCajero] = (cajerosHash[nomCajero] || 0) + tVentaTicket;
+
                 if (v.pagos && Array.isArray(v.pagos) && v.pagos.length > 0) {
-                    // Si tiene el nuevo formato de pagos divididos
                     v.pagos.forEach(p => {
                         let monto = parseFloat(p.montoAplicado) || 0;
                         if(p.metodo === 'Efectivo') ef += monto;
@@ -2394,116 +2545,169 @@ function renderCorte() {
                         else if(p.metodo === 'Crédito') cr += monto;
                     });
                 } else {
-                    // Respaldo para ventas antiguas o simples
-                    let montoSimple = parseFloat(v.total) || 0;
                     let mStr = v.metodo || '';
-                    if(mStr.includes('Efectivo')) ef += montoSimple;
-                    else if(mStr.includes('Tarjeta')) ta += montoSimple;
-                    else if(mStr.includes('Transferencia')) trans += montoSimple;
-                    else if(mStr.includes('Crédito')) cr += montoSimple;
+                    if(mStr.includes('Efectivo')) ef += tVentaTicket;
+                    else if(mStr.includes('Tarjeta')) ta += tVentaTicket;
+                    else if(mStr.includes('Transferencia')) trans += tVentaTicket;
+                    else if(mStr.includes('Crédito')) cr += tVentaTicket;
                 }
 
-                // Calcular Utilidad y Top Productos
+                let utilTicket = 0;
                 if (v.detalles) { 
                     v.detalles.forEach(d => { 
                         if(d.can > 0) { 
                             let itemInv = inv[d.cod] || {}; 
-                            let costoUnitario = parseFloat(itemInv.cos || 0) * (1 + (parseFloat(itemInv.iva || 0)/100));
-                            tUtilidad += (parseFloat(d.subtotal) || 0) - (costoUnitario * parseFloat(d.can || 1)); 
-                            prodsHash[d.nom] = (prodsHash[d.nom] || 0) + parseFloat(d.can || 1); 
+                            let cosUnit = parseFloat(itemInv.cos || 0) * (1 + (parseFloat(itemInv.iva || 0)/100));
+                            let utilItem = (parseFloat(d.subtotal) || 0) - (cosUnit * parseFloat(d.can || 1));
+                            utilTicket += utilItem;
                             depsHash[d.dep || "General"] = (depsHash[d.dep || "General"] || 0) + parseFloat(d.subtotal || 0); 
+
+                            // 🔥 Lógica para calcular el Top 10
+                            let prodNom = d.nom || itemInv.nom || 'Desconocido';
+                            let cantidadStr = String(d.can).toLowerCase();
+                            // No sumamos cosas que sean "Granel" o pesadas extrañamente si no son números limpios,
+                            // pero intentamos limpiar el número
+                            let cantFloat = parseFloat(cantidadStr) || 0; 
+                            
+                            if (!topProductosHash[d.cod]) {
+                                topProductosHash[d.cod] = { nombre: prodNom, cantidad: 0, total: 0 };
+                            }
+                            topProductosHash[d.cod].cantidad += cantFloat;
+                            topProductosHash[d.cod].total += parseFloat(d.subtotal) || 0;
                         }
                     }); 
                 }
+                tUtilidad += utilTicket;
+                utilPorDia[dStr] = (utilPorDia[dStr] || 0) + utilTicket;
             }
 
-            // Generar fila de la tabla
             let classes = v.anulada ? 'anulada-row' : ''; 
             let tag = v.anulada ? '<span style="color:red; font-weight:bold;">[ANULADA]</span> ' : '';
-            if(!v.anulada && v.items && v.items.includes('Devolución')) tag = '<span style="color:#fd7e14; font-weight:bold;">[DEV. PARCIAL]</span> ';
-            
             return `<tr class="${classes}">
-                <td>${v.fecha} ${v.hora}</td>
-                <td>${v.cajero}</td>
-                <td>${v.sucursal || 'Matriz'}</td>
+                <td>${v.fecha} ${v.hora}</td><td>${v.cajero}</td><td>${v.sucursal || 'Matriz'}</td>
                 <td style="font-weight:bold">$${(parseFloat(v.total)||0).toFixed(2)}</td>
-                <td>${v.metodo}</td>
-                <td>${tag}${(v.items || '').substring(0,30)}...</td>
+                <td>${v.metodo}</td><td>${tag}${(v.items || '').substring(0,30)}...</td>
             </tr>`; 
         }).join(''); 
 
-        // 3. Procesar Movimientos (Entradas y Salidas)
         let ing_efectivo = 0, ret_efectivo = 0;
-        let out_compras = 0, out_prov = 0, out_otros = 0; 
-
         movimientos.forEach(m => {
             let mFecha = m.fecha || hoy; 
             if(mFecha >= fInicio && mFecha <= fFin && (!fCajero || m.cajero === fCajero) && (!fSuc || m.sucursal === fSuc)) { 
                 let montoM = parseFloat(m.monto) || 0;
-                if(m.tipo === 'Ingreso') {
-                    ing_efectivo += montoM; 
-                } else if(m.tipo === 'Retiro') {
-                    ret_efectivo += montoM;
-                    if(m.motivo && m.motivo.includes('Compra de mercancía')) out_compras += montoM;
-                    else if(m.motivo && m.motivo.includes('Pago a Proveedor')) out_prov += montoM;
-                    else out_otros += montoM;
-                } 
+                if(m.tipo === 'Ingreso') ing_efectivo += montoM; 
+                else if(m.tipo === 'Retiro') ret_efectivo += montoM;
             } 
         });
 
-        // 4. ACTUALIZAR PANTALLA
+        // 🔥 ORDENAR Y DIBUJAR EL TOP 10 DE PRODUCTOS 🔥
+        let arrayTop = Object.values(topProductosHash).sort((a, b) => b.cantidad - a.cantidad).slice(0, 10);
+        let htmlTop10 = arrayTop.map((p, index) => {
+            return `<tr>
+                <td style="font-weight:bold; color:#666;">${index + 1}</td>
+                <td><b>${p.nombre}</b></td>
+                <td style="color:var(--s); font-weight:bold; font-size:14px;">${p.cantidad}</td>
+                <td style="color:#666;">$${p.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>`;
+        }).join('');
+        document.getElementById('kpi_tabla_top_productos').innerHTML = htmlTop10 || '<tr><td colspan="4">No hay ventas registradas</td></tr>';
+
+        let htmlTablaCajeros = Object.keys(metricasCajero).sort((a,b) => metricasCajero[b].total - metricasCajero[a].total).map(nom => {
+            let datos = metricasCajero[nom];
+            let ticketProm = datos.total / datos.tickets;
+            let horasReales = datos.horasUnicas.size || 1; 
+            let ventaPorHora = datos.total / horasReales;
+
+            return `<tr>
+                <td><b>${nom}</b><br><small style="color:#888;">${horasReales} hr(s) activa(s)</small></td>
+                <td style="color:var(--s); font-weight:bold;">$${datos.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td>$${ticketProm.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td style="color:var(--orange); font-weight:bold; font-size:14px;">$${ventaPorHora.toLocaleString('es-MX', {minimumFractionDigits: 2})} / hr</td>
+            </tr>`;
+        }).join('');
+        document.getElementById('kpi_tabla_cajeros').innerHTML = htmlTablaCajeros || '<tr><td colspan="4">Sin datos</td></tr>';
+
         let efectivoEnCaja = ef + ing_efectivo - ret_efectivo;
+        let ticketPromedio = numVentas > 0 ? (tVentas / numVentas) : 0;
+        let margenPorcentaje = tVentas > 0 ? ((tUtilidad / tVentas) * 100) : 0;
         
-        // Cajas de arriba
+        document.getElementById('kpi_ventas').innerText = "$" + tVentas.toLocaleString('es-MX', {minimumFractionDigits: 2});
+        document.getElementById('kpi_ganancia').innerText = "$" + tUtilidad.toLocaleString('es-MX', {minimumFractionDigits: 2});
+        document.getElementById('kpi_no_ventas').innerText = numVentas;
+        document.getElementById('kpi_ticket_prom').innerText = "$" + ticketPromedio.toLocaleString('es-MX', {minimumFractionDigits: 2});
+        document.getElementById('kpi_margen').innerText = margenPorcentaje.toFixed(2) + "%";
+
         document.getElementById('r_efectivo').innerText = "$"+efectivoEnCaja.toFixed(2); 
         document.getElementById('r_tarjeta').innerText = "$"+ta.toFixed(2); 
         document.getElementById('r_transferencia').innerText = "$"+trans.toFixed(2); 
         document.getElementById('r_credito').innerText = "$"+cr.toFixed(2); 
         document.getElementById('r_total').innerText = "$"+(ef + ta + trans).toFixed(2); 
 
-        // Desglose de Flujo
-        document.getElementById('d_in_v_ef').innerText = "$" + ef.toFixed(2);
-        document.getElementById('d_in_v_otros').innerText = "$" + (ta + trans).toFixed(2);
-        document.getElementById('d_in_otros').innerText = "$" + ing_efectivo.toFixed(2);
-        document.getElementById('d_in_total').innerText = "$" + (ef + ta + trans + ing_efectivo).toFixed(2);
-
-        document.getElementById('d_out_compras').innerText = "$" + out_compras.toFixed(2);
-        document.getElementById('d_out_prov').innerText = "$" + out_prov.toFixed(2);
-        document.getElementById('d_out_otros').innerText = "$" + out_otros.toFixed(2);
-        document.getElementById('d_out_total').innerText = "$" + ret_efectivo.toFixed(2);
-
-        // Analíticas de colores
-        document.getElementById('analisis_global').innerText = "$"+tGlobalRango.toFixed(2); 
-        document.getElementById('analisis_sucursal').innerText = "$"+tSucursalRango.toFixed(2); 
-        document.getElementById('r_utilidad').innerText = "$"+tUtilidad.toFixed(2);
-
         document.getElementById('r_lista_ventas').innerHTML = htmlVentas;
 
-        // Top Productos y Gráfica
-        actualizarTopYGrafica(prodsHash, depsHash);
+        if(typeof actualizarGraficasBI === "function") {
+            actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash);
+        }
 
-    } catch(err) { 
-        console.error("Error Dashboard:", err); 
-    }
-}
+    } catch(err) { console.error("Error Dashboard:", err); }
+}function actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash) {
+    const tooltipOptions = {
+        callbacks: {
+            label: function(context) {
+                let label = context.label || '';
+                let value = context.parsed || context.raw || 0;
+                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                return `${label}: $${value.toLocaleString('es-MX', {minimumFractionDigits:2})} (${percentage}%)`;
+            }
+        }
+    };
 
-// Funciones de apoyo para limpiar el código
-function limpiarTablasDashboard() {
-    document.getElementById('r_lista_ventas').innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay ventas en este periodo</td></tr>";
-}
+    if (chartBarInstance) chartBarInstance.destroy();
+    let fechas = Object.keys(ventasPorDia).sort();
+    chartBarInstance = new Chart(document.getElementById('chartVentasDiarias').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: fechas,
+            datasets: [
+                { label: 'Ventas Totales', data: fechas.map(f => ventasPorDia[f]), backgroundColor: '#8ea1d8' },
+                { label: 'Ganancia Neta', data: fechas.map(f => utilPorDia[f]), backgroundColor: '#475399' }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
 
-function actualizarTopYGrafica(prodsHash, depsHash) {
-    let arrayProds = Object.keys(prodsHash).map(nom => ({ nom: nom, can: prodsHash[nom] })).sort((a,b) => b.can - a.can);
-    document.getElementById('lista_top_prod').innerHTML = arrayProds.slice(0, 5).map((p, index) => { 
-        let medalla = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "⭐"; 
-        return `<tr><td><b>${medalla} #${index+1}</b></td><td>${p.nom}</td><td><b>${p.can}</b> unds.</td></tr>`; 
-    }).join('') || "<tr><td colspan='3' style='text-align:center'>Sin datos</td></tr>";
+    if (chartDeptInstance) chartDeptInstance.destroy(); 
+    chartDeptInstance = new Chart(document.getElementById('chartDept').getContext('2d'), { 
+        type: 'doughnut', 
+        data: { 
+            labels: Object.keys(depsHash), 
+            datasets: [{ data: Object.values(depsHash), backgroundColor: ['#64d0b2', '#007bff', '#28a745', '#17a2b8', '#ffc107', '#6f42c1', '#dc3545', '#fd7e14'], borderWidth: 1 }] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipOptions } } 
+    });
 
-    if (window.deptChartInstance) window.deptChartInstance.destroy(); 
-    let ctx = document.getElementById('chartDept').getContext('2d');
-    if (Object.keys(depsHash).length > 0) { 
-        window.deptChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(depsHash), datasets: [{ data: Object.values(depsHash), backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false } }); 
-    }
+    if (chartCajeroInstance) chartCajeroInstance.destroy(); 
+    chartCajeroInstance = new Chart(document.getElementById('chartCajeros').getContext('2d'), { 
+        type: 'doughnut', 
+        data: { 
+            labels: Object.keys(cajerosHash), 
+            datasets: [{ data: Object.values(cajerosHash), backgroundColor: ['#994769', '#343a40', '#6c757d', '#f8d7da', '#cce5ff', '#d4edda'], borderWidth: 1 }] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipOptions } } 
+    });
+
+    // 4. 🔥 GRÁFICA NUEVA: HORAS PICO 🔥
+    if (chartHorasInstance) chartHorasInstance.destroy(); 
+    let etiquetasHoras = Object.keys(horasHash).sort(); // Ordena las horas cronológicamente (08:00, 09:00...)
+    chartHorasInstance = new Chart(document.getElementById('chartHoras').getContext('2d'), { 
+        type: 'bar', 
+        data: { 
+            labels: etiquetasHoras, 
+            datasets: [{ label: 'Ventas Totales por Hora', data: etiquetasHoras.map(h => horasHash[h]), backgroundColor: '#fd7e14', borderRadius: 4 }] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: tooltipOptions } } 
+    });
 }
 function abrirVisorTickets() { 
     let searchInput = document.getElementById('visor_search');
@@ -3702,10 +3906,11 @@ function finalizarCompra() {
         localStorage.setItem("pos_proveedores_v1", JSON.stringify(proveedores));
         if(typeof renderProveedores === 'function') renderProveedores();
     }
-    if(met === 'Efectivo') {
+   if(met === 'Efectivo') {
         let efectivoActual = calcularEfectivoEnCaja();
+        
         if(efectivoActual < totalCompra) {
-            if(confirm(`⚠️ No hay suficiente efectivo en tu caja.\nEfectivo actual: $${efectivoActual.toFixed(2)}\nTotal de la compra: $${totalCompra.toFixed(2)}\n\n¿Deseas registrar un Ingreso de Efectivo en la caja ahora mismo?`)) {
+            if(confirm(`⚠️ No hay suficiente efectivo físico en tu caja.\nEfectivo actual: $${efectivoActual.toFixed(2)}\nTotal de la compra: $${totalCompra.toFixed(2)}\n\n¿Deseas registrar un Ingreso de Efectivo en la caja ahora mismo para cubrir la diferencia?`)) {
                 abrirModalMovimiento();
                 document.getElementById('mov_tipo').value = 'Ingreso';
                 document.getElementById('mov_monto').value = (totalCompra - efectivoActual).toFixed(2);
@@ -3713,9 +3918,32 @@ function finalizarCompra() {
             }
             return; 
         }
-        movimientos.push({ id: Date.now(), fecha: getFechaLocal(), hora: new Date().toLocaleTimeString(), cajero: usuarioActual, sucursal: sucursalActual, tipo: 'Retiro', monto: totalCompra, motivo: 'Compra de mercancía' + (prov ? ` (${prov})` : '') }); 
+        
+        // Creamos el movimiento de Retiro
+        let idMov = Date.now();
+        let nuevoMov = { 
+            id: idMov, 
+            fecha: getFechaLocal(), 
+            hora: new Date().toLocaleTimeString(), 
+            cajero: usuarioActual, 
+            sucursal: sucursalActual, 
+            tipo: 'Retiro', 
+            monto: totalCompra, 
+            motivo: 'Compra de mercancía' + (prov ? ` (${prov})` : '') 
+        };
+        
+        // Guardamos en memoria local
+        movimientos.push(nuevoMov); 
         localStorage.setItem("pos_movimientos_v1", JSON.stringify(movimientos));
+        
+        // 🔥 LA LÍNEA MÁGICA: Subir el Retiro a la Nube (PocketBase)
+        if (typeof db !== 'undefined') {
+            db.collection("movimientos").doc(String(idMov)).set(nuevoMov)
+            .then(() => console.log("☁️ Salida de efectivo registrada en la nube."))
+            .catch(err => console.error("Error al registrar salida de dinero:", err));
+        }
     }
+       
 
     carC.forEach(x => { 
         let prod = inv[x.cod];
@@ -4518,29 +4746,31 @@ function buscarProductos() {
     timerBusquedaModal = setTimeout(() => {
         let txt = document.getElementById('b_input').value.toLowerCase(); 
         
-        // NUEVO: Si el texto es exactamente igual al de hace un momento, abortamos.
-        // Esto evita que las flechas del teclado reinicien la lista.
         if (txt === ultimoTextoBuscado) return; 
-        ultimoTextoBuscado = txt; // Guardamos el nuevo texto
+        ultimoTextoBuscado = txt; 
 
         let terms = txt.split(/%|\s+/).filter(t => t.trim() !== ""); 
 
-        searchResultsList = []; // Limpia la lista anterior
+        searchResultsList = []; 
 
         let codigos = Object.keys(inv);
         for(let i = 0; i < codigos.length; i++) {
             let cod = codigos[i];
             let p = inv[cod]; 
-            let searchTarget = cod.toLowerCase() + " " + (p.nom||'').toLowerCase();
+            
+            // 🔥 EL ESCUDO: Si el producto está corrupto o vacío, lo saltamos para que no se congele
+            if (!p) continue;
+
+            // Aseguramos que el código y el nombre sean texto válido antes de buscar
+            let searchTarget = String(cod).toLowerCase() + " " + String(p.nom || '').toLowerCase();
             let matches = terms.every(term => searchTarget.includes(term));
 
             if(terms.length === 0 || matches) { 
                 searchResultsList.push({cod: cod, ...p}); 
-                if (searchResultsList.length >= 50) break; // Máximo 50 resultados
+                if (searchResultsList.length >= 50) break; // Máximo 50 resultados para no saturar
             } 
         }
         
-        // Siempre selecciona el primero de la lista por defecto, pero solo cuando sí hubo una búsqueda real
         focusSearchIndex = searchResultsList.length > 0 ? 0 : -1; 
         renderTablaBuscador();
     }, 200); 
@@ -5351,9 +5581,12 @@ function agregarCajaACarrito() {
 // === BUSCADOR INTELIGENTE PARA TRANSFERENCIAS =======================
 // ====================================================================
 function filtrarBusquedaTransferencia(e) {
-    if(e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') return; 
+    if(e && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) return; 
 
-    let texto = document.getElementById('t_cod').value.toLowerCase().trim();
+    let inputTransf = document.getElementById('t_cod');
+    if(!inputTransf) return;
+    
+    let texto = inputTransf.value.toLowerCase().trim();
     let contenedor = document.getElementById('t_sugerencias');
 
     if (texto.length < 2) {
@@ -5365,20 +5598,24 @@ function filtrarBusquedaTransferencia(e) {
     let html = '';
     let limite = 0;
     
-    // Leemos la sucursal actual para mostrar el stock real
     let sucursalOrigen = document.getElementById('t_origen') ? document.getElementById('t_origen').value : sucursalActual;
 
     for (let cod in inv) {
         let prod = inv[cod];
-        let nombreLower = prod.nom.toLowerCase();
-        let codLower = cod.toLowerCase();
+        
+        // 🔥 EL ESCUDO: Si el producto está corrupto o vacío, lo saltamos
+        if (!prod) continue;
+
+        // Lectura segura para evitar que se congele
+        let nombreLower = String(prod.nom || '').toLowerCase();
+        let codLower = String(cod).toLowerCase();
 
         let coincideNombre = terminos.every(termino => nombreLower.includes(termino));
         let coincideCodigo = codLower.includes(texto);
 
         if ((coincideNombre || coincideCodigo) && limite < 15) {
             let stockDisponible = prod.stock ? (prod.stock[sucursalOrigen] || 0) : 0;
-            let colorStock = stockDisponible > 0 ? '#28a745' : '#dc3545'; // Verde si hay, rojo si no hay
+            let colorStock = stockDisponible > 0 ? '#28a745' : '#dc3545'; 
 
             html += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer; color:#333; display:flex; justify-content:space-between;" 
                           onmousedown="seleccionarProdTransferencia('${cod}')" 
@@ -5405,8 +5642,6 @@ function filtrarBusquedaTransferencia(e) {
     
     contenedor.style.display = 'block';
 }
-
-
 function seleccionarProdTransferencia(cod) {
     let input = document.getElementById('t_cod');
     input.value = cod;
@@ -5659,13 +5894,14 @@ function abrirCalculadoraCaja(index) {
 // ====================================================================
 
 function filtrarBusquedaCaja(e) {
-    // Ignoramos las flechas y el enter para que no interfieran con la navegación
-    if(e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') return; 
+    if(e && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) return; 
 
-    let texto = document.getElementById('caja_codigo').value.toLowerCase().trim();
+    let inputCaja = document.getElementById('caja_codigo');
+    if(!inputCaja) return;
+    
+    let texto = inputCaja.value.toLowerCase().trim();
     let contenedor = document.getElementById('caja_sugerencias');
 
-    // Solo buscamos si hay al menos 2 letras para no saturar la memoria
     if (texto.length < 2) {
         contenedor.style.display = 'none';
         return;
@@ -5677,13 +5913,17 @@ function filtrarBusquedaCaja(e) {
     
     for (let cod in inv) {
         let prod = inv[cod];
-        let nombreLower = prod.nom.toLowerCase();
-        let codLower = cod.toLowerCase();
+        
+        // 🔥 EL ESCUDO: Si el producto está corrupto o vacío, lo saltamos
+        if (!prod) continue;
+
+        // Lectura segura para evitar que se congele
+        let nombreLower = String(prod.nom || '').toLowerCase();
+        let codLower = String(cod).toLowerCase();
 
         let coincideNombre = terminos.every(termino => nombreLower.includes(termino));
         let coincideCodigo = codLower.includes(texto);
 
-        // Si coincide y no hemos pasado el límite de 15 sugerencias
         if ((coincideNombre || coincideCodigo) && limite < 15) {
             html += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer; color:#333; display:flex; justify-content:space-between;" 
                           onmousedown="seleccionarProdCaja('${cod}')" 
@@ -5706,7 +5946,6 @@ function filtrarBusquedaCaja(e) {
     
     contenedor.style.display = 'block';
 }
-
 // === FUNCIÓN AL HACER CLIC EN UNA SUGERENCIA DEL BUSCADOR ===
 function seleccionarProdCaja(cod) {
     let input = document.getElementById('caja_codigo');
