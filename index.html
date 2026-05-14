@@ -201,8 +201,39 @@
             margin-bottom: 5px;
         }
     }
+/* ======================================================= */
+    /* 📱 ADAPTACIÓN PERFECTA PARA CELULARES (RESPONSIVE) 📱   */
+    /* ======================================================= */
+    @media (max-width: 768px) {
+        /* 1. Hacemos que la página pueda hacer scroll normal con el dedo */
+        body { height: auto !important; overflow-y: auto !important; }
+        .tabcontent { height: auto !important; min-height: 100vh; overflow-y: visible !important; padding-bottom: 20px; }
 
-</style>
+        /* 2. Menú deslizable */
+        .tab { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab button { white-space: nowrap; flex-shrink: 0; padding: 12px 15px; }
+
+        /* 3. Panel de Ventas en 1 columna */
+        .split-container { display: flex !important; flex-direction: column !important; height: auto !important; }
+        .panel-izq { max-height: none !important; height: auto !important; border-right: none !important; border-bottom: 2px solid #ccc; padding: 15px 10px !important; }
+        .panel-der { height: auto !important; padding: 15px 10px !important; align-items: stretch !important; }
+
+        /* 4. Arreglamos las tarjetas del Dashboard para apilarse en 1 columna */
+        .kpi-grid, .chart-grid, .flujo-grid, .trans-grid { grid-template-columns: 1fr !important; }
+        
+        /* El corte de caja lo dejamos a 2 columnas para ahorrar espacio */
+        .corte-grid { grid-template-columns: 1fr 1fr !important; }
+        .corte-grid > div:last-child { grid-column: span 2 !important; } /* El Total abarca lo ancho */
+
+        /* 5. EVITAR QUE LAS TABLAS ESTIREN LA PANTALLA A LOS LADOS */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table.tabla-pos { min-width: 500px; /* Obliga a la tabla a deslizarse lateralmente en vez de encogerse */ }
+
+        /* Ajustes de Modales */
+        .modal-content { padding: 15px !important; max-height: 90vh !important; }
+        .modal-content input, .modal-content select { font-size: 16px !important; padding: 12px 8px !important; }
+        .modal-content .c-grid { grid-template-columns: 1fr !important; }
+    }</style>
 <!-- AGREGAR ESTO -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.20.1/pocketbase.umd.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -507,25 +538,24 @@
 </div>
 
 <div id="r-tab" class="tabcontent no-print">
-    <div style="padding:25px; max-width: 1400px; margin: 0 auto;">
+    <div style="padding:15px; max-width: 1400px; margin: 0 auto;">
         
         <!-- BARRA DE FILTROS -->
-        <div style="display:flex; gap:15px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div><h3 style="margin:0; color:var(--p)">Filtros:</h3></div>
-            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">FECHA INICIO:</label><input type="date" id="corte_fecha_inicio" onchange="renderCorte()"></div>
-            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">FECHA FIN:</label><input type="date" id="corte_fecha_fin" onchange="renderCorte()"></div>
-            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">CAJERO:</label><select id="corte_cajero" onchange="renderCorte()"><option value="">Todos los cajeros</option></select></div>
-            <div style="flex:1"><label style="font-size:11px; font-weight:bold; color:#666">SUCURSAL:</label><select id="corte_sucursal" onchange="renderCorte()"><option value="">Todas (Global)</option></select></div>
-            <div style="display: flex; gap:10px;"><button class="btn-search" style="padding: 12px 20px; background:var(--p)" onclick="renderCorte()">📊 ANALIZAR</button></div>
+        <div style="display:flex; gap:10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-wrap: wrap;">
+            <div style="flex:1; min-width:120px"><label style="font-size:11px; font-weight:bold; color:#666">FECHA INICIO:</label><input type="date" id="corte_fecha_inicio" onchange="renderCorte()"></div>
+            <div style="flex:1; min-width:120px"><label style="font-size:11px; font-weight:bold; color:#666">FECHA FIN:</label><input type="date" id="corte_fecha_fin" onchange="renderCorte()"></div>
+            <div style="flex:1; min-width:150px"><label style="font-size:11px; font-weight:bold; color:#666">CAJERO:</label><select id="corte_cajero" onchange="renderCorte()"><option value="">Todos los cajeros</option></select></div>
+            <div style="flex:1; min-width:150px"><label style="font-size:11px; font-weight:bold; color:#666">SUCURSAL:</label><select id="corte_sucursal" onchange="renderCorte()"><option value="">Todas (Global)</option></select></div>
+            <div style="width:100%;"><button class="btn-search" style="padding: 12px 20px; background:var(--p); width:100%;" onclick="renderCorte()">📊 ANALIZAR DATOS</button></div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;" class="no-print">
-            <button onclick="abrirCancelacionMovimientos()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🗑️ Anular Movimiento</button>
-            <button onclick="registrarPrecorte()" style="background:#17a2b8; color:white; border:none; padding:10px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">✂️ Hacer Precorte</button>
+            <button onclick="abrirCancelacionMovimientos()" style="flex:1; background:#dc3545; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; cursor:pointer;">🗑️ Anular Movimiento</button>
+            <button onclick="registrarPrecorte()" style="flex:1; background:#17a2b8; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; cursor:pointer;">✂️ Hacer Precorte</button>
         </div>
 
-        <!-- 🔥 NUEVO: KPI SUMMARY (Igual a la imagen) 🔥 -->
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
+        <!-- KPIs PRINCIPALES -->
+        <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
             <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Ventas Totales</h4>
                 <p id="kpi_ventas" style="color:#007bff; font-size:28px; font-weight:bold; margin:0;">$0.00</p>
@@ -545,67 +575,78 @@
                 </div>
             </div>
             <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #fd7e14; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Margen de Utilidad</h4>
+                <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Margen Utilidad</h4>
                 <p id="kpi_margen" style="color:#fd7e14; font-size:28px; font-weight:bold; margin:0;">0.00%</p>
             </div>
         </div>
 
-        <!-- 🔥 NUEVO: GRÁFICAS PRINCIPALES 🔥 -->
+        <!-- GRÁFICAS -->
         <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <h3 style="margin-top:0; color:var(--p);">📈 Ventas vs Ganancia (Por Día)</h3>
             <div style="width:100%; height: 300px;"><canvas id="chartVentasDiarias"></canvas></div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
+        <div class="chart-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
             <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h3 style="margin-top:0; color:var(--p);">📊 Ventas por Departamento</h3>
+                <h3 style="margin-top:0; color:var(--p);">📊 Por Departamento</h3>
                 <div style="width:100%; height: 250px;"><canvas id="chartDept"></canvas></div>
             </div>
             <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h3 style="margin-top:0; color:var(--p);">👤 Rendimiento por Cajero (%)</h3>
+                <h3 style="margin-top:0; color:var(--p);">👤 Rendimiento Cajeros</h3>
                 <div style="width:100%; height: 250px;"><canvas id="chartCajeros"></canvas></div>
             </div>
         </div>
-<!-- 🔥 NUEVO: HORAS PICO Y RENDIMIENTO POR CAJERO 🔥 -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
+
+        <div class="chart-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 20px;">
             <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h3 style="margin-top:0; color:var(--p);">⏰ Ventas por Hora (Horas Pico)</h3>
+                <h3 style="margin-top:0; color:var(--p);">⏰ Horas Pico</h3>
                 <div style="width:100%; height: 250px;"><canvas id="chartHoras"></canvas></div>
             </div>
             <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y:auto; max-height:330px;">
                 <h3 style="margin-top:0; color:var(--p);">🥇 Desempeño por Cajero</h3>
-                <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid #eee; color:#666;">
-                            <th>Cajero</th>
-                            <th>Total Vendido</th>
-                            <th>Ticket Prom.</th>
-                            <th style="color:var(--orange);">Venta / Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kpi_tabla_cajeros"></tbody>
+                <div class="table-responsive">
+                    <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
+                        <thead><tr style="border-bottom: 2px solid #eee; color:#666;"><th>Cajero</th><th>Total</th><th>Prom.</th><th style="color:var(--orange);">Venta/Hr</th></tr></thead>
+                        <tbody id="kpi_tabla_cajeros"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLUJO DE EFECTIVO -->
+        <h3 style="color:#17a2b8; margin-top:30px;">🔄 Desglose de Flujo (Caja/Bancos)</h3>
+        <div class="flujo-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 30px;">
+            <div style="background:#f2f9f2; border: 1px solid #d4ebd4; border-radius:8px; padding:20px;">
+                <h4 style="color:#28a745; margin:0 0 15px 0; border-bottom: 2px solid #28a745; padding-bottom:10px;">📈 ENTRADAS (Ingresos)</h4>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Ventas en Efectivo:</span> <b style="color:#28a745" id="flujo_in_efectivo">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Ventas (Tarjeta/Transf):</span> <b style="color:#28a745" id="flujo_in_digital">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Otros Ingresos:</span> <b style="color:#28a745" id="flujo_in_otros">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; border-top: 1px dashed #a5d8a5; padding-top:15px; font-size:16px;"><b>TOTAL ENTRADAS:</b> <b style="color:#28a745" id="flujo_in_total">$0.00</b></div>
+            </div>
+            <div style="background:#fdf2f2; border: 1px solid #f5c6c6; border-radius:8px; padding:20px;">
+                <h4 style="color:#dc3545; margin:0 0 15px 0; border-bottom: 2px solid #dc3545; padding-bottom:10px;">📉 SALIDAS (Egresos)</h4>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Compras Mercancía:</span> <b style="color:#dc3545" id="flujo_out_compras">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Pago a Proveedores:</span> <b style="color:#dc3545" id="flujo_out_proveedores">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Otros Gastos/Retiros:</span> <b style="color:#dc3545" id="flujo_out_otros">$0.00</b></div>
+                <div style="display:flex; justify-content:space-between; border-top: 1px dashed #f5a9a9; padding-top:15px; font-size:16px;"><b>TOTAL SALIDAS:</b> <b style="color:#dc3545" id="flujo_out_total">$0.00</b></div>
+            </div>
+        </div>
+
+        <!-- TOP 10 -->
+        <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="margin-top:0; color:var(--p);">🏆 Top 10 Productos Más Vendidos</h3>
+            <div class="table-responsive">
+                <table class="tabla-pos" style="margin:0; width:100%; text-align:left;">
+                    <thead><tr style="border-bottom: 2px solid #eee; color:#666;"><th>#</th><th>Producto</th><th>Vendidos</th><th>Ingreso</th></tr></thead>
+                    <tbody id="kpi_tabla_top_productos"></tbody>
                 </table>
             </div>
         </div>
-<!-- 🔥 NUEVO: TOP 10 PRODUCTOS 🔥 -->
-        <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <h3 style="margin-top:0; color:var(--p);">🏆 Top 10 Productos Más Vendidos</h3>
-            <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #eee; color:#666;">
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 55%;">Producto</th>
-                        <th style="width: 20%;">Cant. Vendida</th>
-                        <th style="width: 20%;">Ingreso Generado</th>
-                    </tr>
-                </thead>
-                <tbody id="kpi_tabla_top_productos"></tbody>
-            </table>
-        </div>
-        <!-- CORTE DE CAJA CLÁSICO (Flujo de Efectivo Físico) -->
+
+        <!-- CORTE DE CAJA -->
         <div class="dash-card" style="border-top: 5px solid var(--s); margin-bottom: 20px; background: #f8fdf9;">
-            <h3 style="margin-top:0; color:var(--s);">💰 Corte de Caja Físico (Efectivo y Terminal)</h3>
-            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
+            <h3 style="margin-top:0; color:var(--s);">💰 Corte de Caja Físico</h3>
+            <div class="corte-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
                 <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e8e1; border-radius:8px;"><h4 style="margin:0; color:#1e8449; font-size:11px;">💵 EFECTIVO EN CAJA</h4><p id="r_efectivo" style="font-size:24px; font-weight:bold; margin:5px 0; color: #1e8449;">$0.00</p></div>
                 <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e1e8; border-radius:8px;"><h4 style="margin:0; color:#21618c; font-size:11px;">💳 TARJETA</h4><p id="r_tarjeta" style="font-size:24px; font-weight:bold; margin:5px 0; color: #21618c;">$0.00</p></div>
                 <div style="text-align:center; padding:15px; background:white; border: 1px solid #e8e1e8; border-radius:8px;"><h4 style="margin:0; color:#6f42c1; font-size:11px;">📱 TRANSFERENCIA</h4><p id="r_transferencia" style="font-size:24px; font-weight:bold; margin:5px 0; color: #6f42c1;">$0.00</p></div>
@@ -614,83 +655,25 @@
             </div>
         </div>
 
-        <h3 style="color:var(--d)">Detalle de Operaciones</h3>
-        <div style="height: 300px; overflow-y: auto; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"><table class="tabla-pos" style="margin:0;"><thead><tr><th>Fecha / Hora</th><th>Cajero</th><th>Sucursal</th><th>Total</th><th>Método</th><th>Detalle</th></tr></thead><tbody id="r_lista_ventas"></tbody></table></div>
-    </div>
-</div>
-        <div class="dash-card" style="border-top: 5px solid var(--s); margin-bottom: 20px; background: #f8fdf9;">
-            <h3 style="margin-top:0; color:var(--s); display: flex; justify-content: space-between;"><span>💰 Corte de Caja: <b id="lbl_nombre_cajero">Todos</b></span><span style="font-size: 14px; color: #666;">Filtros activos</span></h3>
-            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
-                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e8e1; border-radius:8px;"><h4 style="margin:0; color:#1e8449; font-size:11px; letter-spacing: 1px;">💵 EFECTIVO EN CAJA</h4><p id="r_efectivo" style="font-size:24px; font-weight:bold; margin:5px 0; color: #1e8449;">$0.00</p><small style="color:#888;">Ventas + Ingresos - Gastos</small></div>
-                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e1e1e8; border-radius:8px;"><h4 style="margin:0; color:#21618c; font-size:11px; letter-spacing: 1px;">💳 TARJETA</h4><p id="r_tarjeta" style="font-size:24px; font-weight:bold; margin:5px 0; color: #21618c;">$0.00</p></div>
-                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e8e1e8; border-radius:8px;"><h4 style="margin:0; color:#6f42c1; font-size:11px; letter-spacing: 1px;">📱 TRANSFERENCIA</h4><p id="r_transferencia" style="font-size:24px; font-weight:bold; margin:5px 0; color: #6f42c1;">$0.00</p></div>
-                <div style="text-align:center; padding:15px; background:white; border: 1px solid #e8e8e1; border-radius:8px;"><h4 style="margin:0; color:#9a7d0a; font-size:11px; letter-spacing: 1px;">📝 CRÉDITO (FIADO)</h4><p id="r_credito" style="font-size:24px; font-weight:bold; margin:5px 0; color: #9a7d0a;">$0.00</p></div>
-                <div style="text-align:center; padding:15px; background:var(--s); border-radius:8px; color: white;"><h4 style="margin:0; font-size:11px; letter-spacing: 1px;">🏆 VENTAS TOTALES</h4><p id="r_total" style="font-size:24px; font-weight:bold; margin:5px 0;">$0.00</p></div>
+        <!-- ANALISIS TRANSFERENCIAS -->
+        <div class="dash-card" style="margin-bottom: 20px; border-top: 4px solid var(--kit); background: #fff;">
+            <h3 style="margin-top:0; color:var(--kit);">🚚 Transferencias de Mercancía</h3>
+            <div class="trans-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:15px;">
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; text-align:center;"><h4 style="color:#666; font-size:11px; margin:0">ENVIADA</h4><p id="d_trans_env_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:var(--kit)">$0.00</p></div>
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; text-align:center;"><h4 style="color:#666; font-size:11px; margin:0">RECIBIDA</h4><p id="d_trans_rec_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:var(--s)">$0.00</p></div>
+                <div style="background:#fff3cd; padding:15px; border-radius:8px; border:1px solid #ffeeba; text-align:center;"><h4 style="color:#856404; font-size:11px; margin:0">EN TRÁNSITO</h4><p id="d_trans_pen_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:#856404">$0.00</p></div>
             </div>
-        </div>
-<div class="dash-card" style="margin-bottom: 20px; border-top: 4px solid var(--info); background: #fff;">
-            <h3 style="margin-top:0; color:var(--info);">🔄 Desglose de Flujo (Entradas y Salidas de Caja/Bancos)</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div style="background:#e8f5e9; padding:15px; border-radius:8px; border:1px solid #c8e6c9;">
-                    <h4 style="color:#2e7d32; margin-top:0; border-bottom:2px solid #a5d6a7; padding-bottom:5px;">📈 ENTRADAS (Ingresos)</h4>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Ventas en Efectivo:</span> <b style="color:#2e7d32" id="d_in_v_ef">$0.00</b></p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Ventas (Tarjeta/Transf):</span> <b style="color:#2e7d32" id="d_in_v_otros">$0.00</b></p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Otros Ingresos (Fondo, etc):</span> <b style="color:#2e7d32" id="d_in_otros">$0.00</b></p>
-                    <hr style="border:0; border-top:1px dashed #a5d6a7; margin:10px 0;">
-                    <p style="margin:0; display:flex; justify-content:space-between; font-size:16px;"><b>TOTAL ENTRADAS:</b> <b style="color:#2e7d32" id="d_in_total">$0.00</b></p>
-                </div>
-                <div style="background:#ffebee; padding:15px; border-radius:8px; border:1px solid #ffcdd2;">
-                    <h4 style="color:#c62828; margin-top:0; border-bottom:2px solid #ef9a9a; padding-bottom:5px;">📉 SALIDAS (Egresos)</h4>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Compras (Mercancía):</span> <b style="color:#c62828" id="d_out_compras">$0.00</b></p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Pago a Proveedores:</span> <b style="color:#c62828" id="d_out_prov">$0.00</b></p>
-                    <p style="margin:5px 0; display:flex; justify-content:space-between; font-size:14px;"><span>Otros Gastos/Retiros:</span> <b style="color:#c62828" id="d_out_otros">$0.00</b></p>
-                    <hr style="border:0; border-top:1px dashed #ef9a9a; margin:10px 0;">
-                    <p style="margin:0; display:flex; justify-content:space-between; font-size:16px;"><b>TOTAL SALIDAS:</b> <b style="color:#c62828" id="d_out_total">$0.00</b></p>
-                </div>
-            </div>
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
-            <div class="val-box" style="background:#007bff; color:white; padding:15px; border-radius:10px;"><h4 style="color:#e0f0ff">Venta Global (Rango)</h4><p id="analisis_global" style="color:white; font-size:22px;">$0.00</p></div>
-            <div class="val-box" style="background:#17a2b8; color:white; padding:15px; border-radius:10px;"><h4 style="color:#e0fcf4">Sucursal (Rango)</h4><p id="analisis_sucursal" style="color:white; font-size:22px;">$0.00</p></div>
-            <div class="val-box" style="background:#6f42c1; color:white; padding:15px; border-radius:10px;"><h4 style="color:#f2e0ff">Utilidad (Filtros)</h4><p id="r_utilidad" style="color:white; font-size:22px;">$0.00</p></div>
-            <div class="val-box" style="background:#6c757d; color:white; padding:15px; border-radius:10px;"><h4 style="color:#eee">Crecimiento %</h4><p id="analisis_crecimiento" style="color:white; font-size:22px;">0%</p></div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom: 20px;">
-            <div class="dash-card"><h3 style="margin-top:0; color:var(--p)">🏆 Top Productos</h3><table class="tabla-pos" style="margin-top:0"><thead><tr><th>Posición</th><th>Producto</th><th>Departamento</th><th>Unidades</th></tr></thead><tbody id="lista_top_prod"></tbody></table></div>
-            <div class="dash-card" style="display: flex; flex-direction: column; align-items: center;"><h3 style="margin-top:0; color:var(--p); width:100%">📊 Ventas por Departamento</h3><div style="width:100%; max-height: 250px; display:flex; justify-content:center;"><canvas id="chartDept"></canvas></div></div>
+        <!-- HISTORIAL DE TICKETS -->
+        <h3 style="color:var(--d)">Detalle de Operaciones (Ventas, Abonos y Gastos)</h3>
+        <div class="table-responsive" style="height: 300px; background: white; border-radius: 10px; border: 1px solid #ddd;">
+            <table class="tabla-pos" style="margin:0;">
+                <thead><tr><th>Fecha/Hora</th><th>Cajero</th><th>Sucursal</th><th>Total</th><th>Método</th><th>Detalle</th></tr></thead>
+                <tbody id="r_lista_ventas"></tbody>
+            </table>
         </div>
 
-<div class="dash-card" style="margin-bottom: 20px; border-top: 4px solid var(--kit); background: #fff;">
-            <h3 style="margin-top:0; color:var(--kit);">🚚 Análisis de Transferencias de Mercancía</h3>
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:15px;">
-                <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; text-align:center;">
-                    <h4 style="color:#666; margin:0; font-size:11px;">MERCANCÍA ENVIADA (SALIDAS)</h4>
-                    <p id="d_trans_env_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:var(--kit)">$0.00</p>
-                    <small id="d_trans_env_cant" style="color:#888; font-weight:bold;">0 envíos</small>
-                </div>
-                <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; text-align:center;">
-                    <h4 style="color:#666; margin:0; font-size:11px;">MERCANCÍA RECIBIDA (ENTRADAS)</h4>
-                    <p id="d_trans_rec_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:var(--s)">$0.00</p>
-                    <small id="d_trans_rec_cant" style="color:#888; font-weight:bold;">0 recibidos</small>
-                </div>
-                <div style="background:#fff3cd; padding:15px; border-radius:8px; border:1px solid #ffeeba; text-align:center;">
-                    <h4 style="color:#856404; margin:0; font-size:11px;">EN TRÁNSITO (PENDIENTES POR RECIBIR)</h4>
-                    <p id="d_trans_pen_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:#856404">$0.00</p>
-                    <small id="d_trans_pen_cant" style="color:#856404; font-weight:bold;">0 pendientes</small>
-                </div>
-            </div>
-            <div style="height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
-                <table class="tabla-pos" style="margin:0;">
-                    <thead style="background:#f1f1f1;"><tr><th>Fecha / Hora</th><th>Ruta (Origen ➡️ Destino)</th><th>Estado</th><th>Costo Transferido</th></tr></thead>
-                    <tbody id="d_lista_transferencias"></tbody>
-                </table>
-            </div>
-        </div>
-        
-
-        <h3 style="color:var(--d)">Detalle de Operaciones (Ventas, Abonos, Ingresos y Gastos)</h3>
-        <div style="height: 300px; overflow-y: auto; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"><table class="tabla-pos" style="margin:0;"><thead><tr><th>Fecha / Hora</th><th>Cajero</th><th>Sucursal</th><th>Total</th><th>Método</th><th>Detalle</th></tr></thead><tbody id="r_lista_ventas"></tbody></table></div>
     </div>
 </div>
 
@@ -2498,11 +2481,10 @@ function renderCorte() {
         let cajerosHash = {};
         let horasHash = {}; 
         let metricasCajero = {}; 
-        let topProductosHash = {}; // 🔥 Diccionario para el Top 10
+        let topProductosHash = {}; 
 
         if (!ventas || ventas.length === 0) {
             document.getElementById('r_lista_ventas').innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay ventas en este periodo</td></tr>";
-            document.getElementById('kpi_tabla_top_productos').innerHTML = "<tr><td colspan='4' style='text-align:center'>No hay datos</td></tr>";
             return;
         }
 
@@ -2562,12 +2544,8 @@ function renderCorte() {
                             utilTicket += utilItem;
                             depsHash[d.dep || "General"] = (depsHash[d.dep || "General"] || 0) + parseFloat(d.subtotal || 0); 
 
-                            // 🔥 Lógica para calcular el Top 10
                             let prodNom = d.nom || itemInv.nom || 'Desconocido';
-                            let cantidadStr = String(d.can).toLowerCase();
-                            // No sumamos cosas que sean "Granel" o pesadas extrañamente si no son números limpios,
-                            // pero intentamos limpiar el número
-                            let cantFloat = parseFloat(cantidadStr) || 0; 
+                            let cantFloat = parseFloat(String(d.can)) || 0; 
                             
                             if (!topProductosHash[d.cod]) {
                                 topProductosHash[d.cod] = { nombre: prodNom, cantidad: 0, total: 0 };
@@ -2590,60 +2568,73 @@ function renderCorte() {
             </tr>`; 
         }).join(''); 
 
+        // 🔥 NUEVA LÓGICA: Separación de Ingresos y Egresos para el Flujo 🔥
         let ing_efectivo = 0, ret_efectivo = 0;
+        let flujo_ing_otros = 0;
+        let flujo_out_compras = 0;
+        let flujo_out_otros = 0;
+
         movimientos.forEach(m => {
             let mFecha = m.fecha || hoy; 
             if(mFecha >= fInicio && mFecha <= fFin && (!fCajero || m.cajero === fCajero) && (!fSuc || m.sucursal === fSuc)) { 
                 let montoM = parseFloat(m.monto) || 0;
-                if(m.tipo === 'Ingreso') ing_efectivo += montoM; 
-                else if(m.tipo === 'Retiro') ret_efectivo += montoM;
+                let mMotivo = (m.motivo || '').toLowerCase();
+
+                if(m.tipo === 'Ingreso') {
+                    ing_efectivo += montoM; 
+                    flujo_ing_otros += montoM;
+                } 
+                else if(m.tipo === 'Retiro') {
+                    ret_efectivo += montoM;
+                    // Detectar si fue por compra a proveedor
+                    if (mMotivo.includes('compra') || mMotivo.includes('proveedor')) {
+                        flujo_out_compras += montoM;
+                    } else {
+                        flujo_out_otros += montoM;
+                    }
+                }
             } 
         });
 
-        // 🔥 ORDENAR Y DIBUJAR EL TOP 10 DE PRODUCTOS 🔥
+        // Llenado de tablas secundarias
         let arrayTop = Object.values(topProductosHash).sort((a, b) => b.cantidad - a.cantidad).slice(0, 10);
         let htmlTop10 = arrayTop.map((p, index) => {
-            return `<tr>
-                <td style="font-weight:bold; color:#666;">${index + 1}</td>
-                <td><b>${p.nombre}</b></td>
-                <td style="color:var(--s); font-weight:bold; font-size:14px;">${p.cantidad}</td>
-                <td style="color:#666;">$${p.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-            </tr>`;
+            return `<tr><td style="font-weight:bold; color:#666;">${index + 1}</td><td><b>${p.nombre}</b></td><td style="color:var(--s); font-weight:bold; font-size:14px;">${p.cantidad}</td><td style="color:#666;">$${p.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td></tr>`;
         }).join('');
-        document.getElementById('kpi_tabla_top_productos').innerHTML = htmlTop10 || '<tr><td colspan="4">No hay ventas registradas</td></tr>';
+        if(document.getElementById('kpi_tabla_top_productos')) document.getElementById('kpi_tabla_top_productos').innerHTML = htmlTop10 || '<tr><td colspan="4">No hay ventas registradas</td></tr>';
 
         let htmlTablaCajeros = Object.keys(metricasCajero).sort((a,b) => metricasCajero[b].total - metricasCajero[a].total).map(nom => {
             let datos = metricasCajero[nom];
-            let ticketProm = datos.total / datos.tickets;
-            let horasReales = datos.horasUnicas.size || 1; 
-            let ventaPorHora = datos.total / horasReales;
-
-            return `<tr>
-                <td><b>${nom}</b><br><small style="color:#888;">${horasReales} hr(s) activa(s)</small></td>
-                <td style="color:var(--s); font-weight:bold;">$${datos.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                <td>$${ticketProm.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
-                <td style="color:var(--orange); font-weight:bold; font-size:14px;">$${ventaPorHora.toLocaleString('es-MX', {minimumFractionDigits: 2})} / hr</td>
-            </tr>`;
+            return `<tr><td><b>${nom}</b><br><small style="color:#888;">${datos.horasUnicas.size || 1} hr(s)</small></td><td style="color:var(--s); font-weight:bold;">$${datos.total.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td><td>$${(datos.total / datos.tickets).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td><td style="color:var(--orange); font-weight:bold;">$${(datos.total / (datos.horasUnicas.size || 1)).toLocaleString('es-MX', {minimumFractionDigits: 2})} / hr</td></tr>`;
         }).join('');
-        document.getElementById('kpi_tabla_cajeros').innerHTML = htmlTablaCajeros || '<tr><td colspan="4">Sin datos</td></tr>';
+        if(document.getElementById('kpi_tabla_cajeros')) document.getElementById('kpi_tabla_cajeros').innerHTML = htmlTablaCajeros || '<tr><td colspan="4">Sin datos</td></tr>';
 
+        // Llenar KPI y Corte Físico
         let efectivoEnCaja = ef + ing_efectivo - ret_efectivo;
-        let ticketPromedio = numVentas > 0 ? (tVentas / numVentas) : 0;
-        let margenPorcentaje = tVentas > 0 ? ((tUtilidad / tVentas) * 100) : 0;
-        
         document.getElementById('kpi_ventas').innerText = "$" + tVentas.toLocaleString('es-MX', {minimumFractionDigits: 2});
         document.getElementById('kpi_ganancia').innerText = "$" + tUtilidad.toLocaleString('es-MX', {minimumFractionDigits: 2});
         document.getElementById('kpi_no_ventas').innerText = numVentas;
-        document.getElementById('kpi_ticket_prom').innerText = "$" + ticketPromedio.toLocaleString('es-MX', {minimumFractionDigits: 2});
-        document.getElementById('kpi_margen').innerText = margenPorcentaje.toFixed(2) + "%";
-
+        document.getElementById('kpi_ticket_prom').innerText = "$" + (numVentas > 0 ? (tVentas / numVentas) : 0).toLocaleString('es-MX', {minimumFractionDigits: 2});
+        document.getElementById('kpi_margen').innerText = (tVentas > 0 ? ((tUtilidad / tVentas) * 100) : 0).toFixed(2) + "%";
         document.getElementById('r_efectivo').innerText = "$"+efectivoEnCaja.toFixed(2); 
         document.getElementById('r_tarjeta').innerText = "$"+ta.toFixed(2); 
         document.getElementById('r_transferencia').innerText = "$"+trans.toFixed(2); 
         document.getElementById('r_credito').innerText = "$"+cr.toFixed(2); 
         document.getElementById('r_total').innerText = "$"+(ef + ta + trans).toFixed(2); 
-
         document.getElementById('r_lista_ventas').innerHTML = htmlVentas;
+
+        // 🔥 LLENAR LOS DATOS DEL NUEVO DESGLOSE DE FLUJO 🔥
+        if(document.getElementById('flujo_in_efectivo')) {
+            document.getElementById('flujo_in_efectivo').innerText = "$" + ef.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('flujo_in_digital').innerText = "$" + (ta + trans).toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('flujo_in_otros').innerText = "$" + flujo_ing_otros.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('flujo_in_total').innerText = "$" + (ef + ta + trans + flujo_ing_otros).toLocaleString('es-MX', {minimumFractionDigits: 2});
+
+            document.getElementById('flujo_out_compras').innerText = "$" + flujo_out_compras.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('flujo_out_proveedores').innerText = "$0.00"; // Si en el futuro separas compras locales vs proveedores
+            document.getElementById('flujo_out_otros').innerText = "$" + flujo_out_otros.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('flujo_out_total').innerText = "$" + (flujo_out_compras + flujo_out_otros).toLocaleString('es-MX', {minimumFractionDigits: 2});
+        }
 
         if(typeof actualizarGraficasBI === "function") {
             actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash);
