@@ -93,10 +93,10 @@
     /* 🔥 2. FORZAR TODO AL TAMAÑO Y GROSOR DEL ENCABEZADO 🔥 */
     .print-active, .print-active * {
         visibility: visible !important;
-        color: #000000 !important; /* Negro purísimo */
+        color: #000000 !important;
         font-family: 'Courier New', Courier, monospace !important;
-        font-weight: 900 !important; /* Grosor máximo (Ultra Black) */
-        font-size: 20px !important; /* Tamaño gigante para todo */
+        font-weight: 900 !important; 
+        font-size: var(--ticket-font, 14px) !important; /* 🔥 AHORA ES DINÁMICO 🔥 */
         line-height: 1.2 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -134,8 +134,8 @@
     }
     
     /* El encabezado y el total un poquito más grandes nada más */
-    .print-active h2, .print-active .total-gigante {
-        font-size: 26px !important;
+  .print-active h2, .print-active .total-gigante {
+        font-size: calc(var(--ticket-font, 14px) + 6px) !important;
     }
 }
 
@@ -233,7 +233,73 @@
         .modal-content { padding: 15px !important; max-height: 90vh !important; }
         .modal-content input, .modal-content select { font-size: 16px !important; padding: 12px 8px !important; }
         .modal-content .c-grid { grid-template-columns: 1fr !important; }
-    }</style>
+    }
+/* ======================================================= */
+    /* 📱 CORRECCIÓN PARA EL INVENTARIO Y TABLAS (CELULAR) 📱  */
+    /* ======================================================= */
+    @media (max-width: 768px) {
+        /* 1. Reducir márgenes blancos a los lados */
+        #i-tab > div { padding: 10px !important; }
+
+        /* 2. Acomodar el Título y el Total */
+        #i-tab > div > div:nth-child(1) {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 15px !important;
+        }
+        
+        /* 3. Acomodar botones (Recepciones, Enviar, Excel, etc.) en cuadrícula */
+        #i-tab > div > div:nth-child(1) > div:last-child {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+        }
+        #i-tab > div > div:nth-child(1) button {
+            width: 100% !important;
+            font-size: 11px !important;
+            padding: 10px 5px !important;
+            margin: 0 !important;
+            white-space: normal !important;
+        }
+
+        /* 4. Apilar la barra de Búsqueda y los Filtros */
+        #i-tab > div > div:nth-child(2) {
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        #i-tab input#buscar_inv, 
+        #i-tab select#filtro_dep, 
+        #i-tab select#filtro_tipo {
+            width: 100% !important;
+            flex: none !important;
+        }
+
+        /* 5. EL ESCUDO DE LA TABLA: Permite deslizar con el dedo sin aplastar */
+        #i-tab > div > div:nth-child(3) {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        #i-tab table.tabla-pos {
+            min-width: 850px !important; /* Fuerza el ancho para que respire */
+        }
+        
+        /* 6. Vacuna preventiva para Clientes, Promociones y Proveedores */
+        #cli-tab > div > div:last-child,
+        #pro-tab > div > div:last-child,
+        #prov-tab > div > div:last-child,
+        #k-tab > div > div:last-child {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        #cli-tab table.tabla-pos, 
+        #pro-tab table.tabla-pos, 
+        #prov-tab table.tabla-pos,
+        #k-tab table.tabla-pos {
+            min-width: 600px !important;
+        }
+    }
+
+</style>
 <!-- AGREGAR ESTO -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.20.1/pocketbase.umd.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -252,88 +318,57 @@
 </div>
 
 <div class="tab no-print">
-    <button class="t-btn active" id="btn_v-tab" onclick="changeTab(event, 'v-tab')">VENTAS</button>
-    <button class="t-btn" id="btn_c-tab" onclick="changeTab(event, 'c-tab')">COMPRAS</button>
+    <button class="t-btn active" id="btn_v-tab" onclick="changeTab(event, 'v-tab')">VENTAS [F1]</button>
+    <button class="t-btn" id="btn_c-tab" onclick="changeTab(event, 'c-tab')">COMPRAS [F2]</button>
     <button class="t-btn" id="btn_prov-tab" onclick="changeTab(event, 'prov-tab')" style="background:#444; color:white;">PROVEEDORES</button>
-    <button class="t-btn" id="btn_k-tab" onclick="changeTab(event, 'k-tab')">KITS / GRUPOS</button>
-    <button class="t-btn" id="btn_i-tab" onclick="changeTab(event, 'i-tab')">INVENTARIO</button>
+    <button class="t-btn" id="btn_k-tab" onclick="changeTab(event, 'k-tab')">KITS/GRUPOS</button>
+    <button class="t-btn" id="btn_i-tab" onclick="changeTab(event, 'i-tab')">INVENTARIO [F3]</button>
     <button class="t-btn" id="btn_cli-tab" onclick="changeTab(event, 'cli-tab')">CLIENTES</button>
     <button class="t-btn" id="btn_pro-tab" onclick="changeTab(event, 'pro-tab')">PROMOCIONES</button>
-<button class="t-btn" id="btn_pro-tab" onclick="changeTab(event, 'pro-tab')">PROMOCIONES</button>
     <button class="t-btn" id="btn_rec-tab" onclick="changeTab(event, 'rec-tab')" style="background:#0dcaf0; color:#000; font-weight:bold;">📱 RECARGAS</button>
-    <button class="t-btn" id="btn_r-tab" onclick="changeTab(event, 'r-tab')" style="background:var(--warning); color:#000;">📊 DASHBOARD</button>
     <button class="t-btn" id="btn_r-tab" onclick="changeTab(event, 'r-tab')" style="background:var(--warning); color:#000;">📊 DASHBOARD</button>
     <button class="t-btn" id="btn_u-tab" onclick="changeTab(event, 'u-tab')" style="background:var(--d); color:white;">⚙️ AJUSTES</button>
     
     <div style="margin-left:auto; display:flex; gap:15px; align-items:center;">
         <div id="live_clock" style="color:#aaa; font-size:12px; font-weight:bold; margin-right:10px;"></div>
         
-        <!-- 🔥 CAJITA PRINCIPAL LIMPIA 🔥 -->
-        <select id="ui_sucursal" onchange="cambiarSucursal(this.value)" style="padding:6px; border-radius:6px; font-weight:bold; background:#1a1d20; color:var(--warning); border:1px solid #444;" disabled>
-        </select>
+        <select id="ui_sucursal" onchange="cambiarSucursal(this.value)" style="padding:6px; border-radius:6px; font-weight:bold; background:#1a1d20; color:var(--warning); border:1px solid #444;" disabled></select>
         
         <div style="color:#aaa; font-size:13px; font-weight:bold;">👤 <span id="ui_current_user">N/A</span> | <span style="cursor:pointer; color:var(--danger)" onclick="cerrarSesion()">Salir</span></div>
     </div>
 </div>
 <div id="v-tab" class="tabcontent no-print" style="display:block;">
     <div class="split-container">
-
-        
-        <!-- ================= PANEL IZQUIERDO ================= -->
         <div class="panel-izq">
-            
-            <!-- FILA DE BÚSQUEDA Y CÁMARA (ADAPTABLE) -->
             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; align-items: center;">
                 <input type="text" id="v_cod" placeholder="ESCANEÉ CÓDIGO PRODUCTO..." onkeypress="handleVenta(event)" autofocus style="flex: 1 1 150px; height: 40px; box-sizing: border-box; padding: 0 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;">
-                
                 <button class="no-print" onclick="abrirEscanerCamara()" style="background: #28a745; color: white; border: none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;" title="Escanear con Cámara">📷</button>
-
                 <button class="btn-search" onclick="abrirBuscador()" style="height: 40px; padding: 0 15px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; white-space: nowrap;">🔍 BUSCAR [F10]</button>
             </div>
-
-          <!-- FILA DE BOTONES PAUSAR / GASTOS / HISTORIAL -->
-<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; gap: 10px;">
-    
-    <!-- Grupo Izquierdo: Pausar y Gastos -->
-    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        <button style="background:var(--warning); border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="preguntarPausar()">⏸️ Pausar [F8]</button>
-        
-        <button style="background:var(--info); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="abrirPausadas()">📋 Ver Pausadas [F7] (<span id="count_pausadas">0</span>)</button>
-        
-        <button style="background:#dc3545; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="registrarGasto()">💸 Registrar Gasto</button>
-    </div>
-
-    <!-- Grupo Derecho: Historial -->
-    <button style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="abrirVisorTickets()">🧾 Historial / Devolución [F9]</button>
-    
-</div>
-
-            <!-- TABLA DE PRODUCTOS -->
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; gap: 10px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button style="background:var(--warning); border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="preguntarPausar()">⏸️ Pausar [F8]</button>
+                    <button style="background:var(--info); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="abrirPausadas()">📋 Ver Pausadas [F7] (<span id="count_pausadas">0</span>)</button>
+                    <button style="background:#dc3545; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="registrarGasto()">💸 Registrar Gasto</button>
+                </div>
+                <button style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; white-space: nowrap;" onclick="abrirVisorTickets()">🧾 Historial [F9]</button>
+            </div>
             <table class="tabla-pos">
-                <thead>
-                    <tr><th>Producto</th><th>Cant/Peso</th><th>Precio</th><th>Subtotal</th><th></th></tr>
-                </thead>
+                <thead><tr><th>Producto</th><th>Cant/Peso</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
                 <tbody id="v_lista"></tbody>
             </table>
-            
-        </div> <!-- AQUI SE CIERRA CORRECTAMENTE EL PANEL IZQUIERDO -->
-
-        <!-- ================= PANEL DERECHO (TOTALES) ================= -->
+        </div>
         <div class="panel-der">
             <div id="v_mayoreo_status" style="font-size:11px; padding:6px 12px; border-radius:20px; font-weight:bold; margin-bottom:15px; background: #444; color: #bbb;">MAYOREO: DESACTIVADO</div>
             <div class="sub-total">TOTAL VENTA (<span class="lbl-suc-act">MATRIZ</span>)</div>
             <div class="total-big" style="margin-bottom: 15px;">$<span id="v_total">0.00</span></div>
-            
             <button class="btn-final" style="background:var(--s); height: 70px; font-size: 22px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(40,167,69,0.4);" onclick="abrirCobro()">
                 💵 COBRAR [F12]
             </button>
-
             <p style="color:#777; font-size: 12px; margin-top:20px; text-align: right;">
                 <b>[F10]</b> Buscar | <b>[F4]</b> Mayoreo <br> 
-                <b>[F8]</b> Pausar | <b>[F9]</b> Visor Tickets
+                <b>[F8]</b> Pausar | <b>[F9]</b> Historial
             </p>
-        </div>
-            <p style="color:#777; font-size: 12px; margin-top:20px; text-align: right;"><b>[F10]</b> Buscar | <b>[F4]</b> Mayoreo | <b>[F8]</b> Pausar <br> <b>[F9]</b> Visor Tickets | <b>[F12]</b> Cobrar</p>
         </div>
     </div>
 </div>
@@ -341,74 +376,54 @@
 <div id="c-tab" class="tabcontent no-print">
     <div class="split-container">
         <div class="panel-izq">
-       <!-- FILA DE BÚSQUEDA Y CÁMARA EN COMPRAS (ADAPTABLE) -->
-<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; align-items: center;">
-    
-    <input type="text" id="c_cod" placeholder="SCAN CÓDIGO PRODUCTO A CARGAR..." onkeypress="handleCompraScan(event)" style="flex: 1 1 150px; height: 40px; box-sizing: border-box; padding: 0 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;">
-    
-<button onclick="abrirCalculadoraCajaGlobal()" style="background:#004085; color:white; border:none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;" title="Calculadora de Cajas">📦 Comprar por Caja</button>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; align-items: center;">
+                <input type="text" id="c_cod" placeholder="SCAN CÓDIGO PRODUCTO..." onkeypress="handleCompraScan(event)" style="flex: 1 1 150px; height: 40px; box-sizing: border-box; padding: 0 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="abrirCalculadoraCajaGlobal()" style="background:#004085; color:white; border:none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;">📦 Cajas</button>
+                <button class="no-print" onclick="abrirEscanerCamara('compras')" style="background: #28a745; color: white; border: none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;">📷</button>
+                <button class="btn-search" onclick="abrirBuscador()" style="height: 40px; padding: 0 15px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; white-space: nowrap;">🔍 BUSCAR</button>
+                <button class="btn-search" style="background:var(--s); height: 40px; padding: 0 15px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; white-space: nowrap;" onclick="abrirModalMovimiento()">💵 MOVIMIENTO CAJA</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px;">
+                <div>
+                    <button style="background:var(--warning); border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="pausarCompraActual()">⏸️ Pausar Compra</button>
+                    <button style="background:var(--info); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="abrirComprasPausadas()">📋 Ver Pausadas (<span id="count_pausadas_compras">0</span>)</button>
+                </div>
+                <button style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="abrirVisorCompras()">🧾 Historial de Compras</button>
+            </div>
 
-    <!-- BOTÓN DE CÁMARA (Para compras) -->
-    <button class="no-print" onclick="abrirEscanerCamara('compras')" style="background: #28a745; color: white; border: none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;" title="Escanear con Cámara">📷</button>
-
-    <button class="btn-search" onclick="abrirBuscador()" style="height: 40px; padding: 0 15px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; white-space: nowrap;">🔍 BUSCAR [F10]</button>
-    
-    <button class="btn-search" style="background:var(--s); height: 40px; padding: 0 15px; font-size: 13px; border-radius: 4px; border: none; cursor: pointer; white-space: nowrap;" onclick="abrirModalMovimiento()">💵 MOVIMIENTO EFECTIVO</button>
-<!-- FILA DE BOTONES PAUSAR / HISTORIAL EN COMPRAS -->
-<div style="display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px;">
-    <div>
-
-        <button style="background:var(--warning); border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="pausarCompraActual()">⏸️ Pausar Compra</button>
-        <button style="background:var(--info); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="abrirComprasPausadas()">📋 Ver Pausadas (<span id="count_pausadas_compras">0</span>)</button>
-    </div>
-    <button style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="abrirVisorCompras()">🧾 Historial de Compras</button>
-</div>
-    
-</div> <!-- Aquí cerramos correctamente la fila de arriba -->
-
-<!-- CUADRÍCULA DEL FORMULARIO DE COMPRAS -->
-
-<div class="c-grid">
-    <div style="grid-column: span 2;"><label>Nombre</label><input type="text" id="c_nom"></div>
-    <div><label>Departamento</label><input type="text" id="c_dep" placeholder="Ej. Abarrotes" value="General"></div>
-    <div><label>Tipo</label><select id="c_tipo"><option value="pieza">UNIDAD</option><option value="granel">GRANEL</option></select></div>
-    <div><label>Costo</label><input type="number" id="c_cos"step="0.01" value="0" oninput="actualizarCalculosCompra()"></div>
-    <div><label>IVA/ISR %</label><input type="number" id="c_iva"step="0.01" value="0" oninput="actualizarCalculosCompra()"></div>
-    <div><label style="color:var(--s); font-weight:bold;">Costo Real</label><input type="number" id="c_real" readonly style="background:#e9ecef; font-weight:bold; border-color:var(--s);"></div>
-    
-    <div><label style="color:var(--p); font-weight:bold;">% Ganancia</label><input type="number" id="c_gan" value="30" oninput="calcVentaDesdeGanancia()"></div>
-    <div><label>P. Venta</label><input type="number" id="c_pv" oninput="calcGananciaDesdeVenta()"></div>
-    
-    <div><label>P. Mayo</label><input type="number" id="c_pm"></div>
-    <div><label>Min Mayo</label><input type="number" id="c_md" value="10"></div>
-    
-    <div style="grid-column: span 3; background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba;">
-        <div style="display:flex; gap:15px; align-items:flex-end;">
-            <div style="flex:1;"><label>Cant. a Cargar (Enter añade)</label><input type="number" id="c_cant" value="1" onkeypress="if(event.key==='Enter') manualAddToList()"></div>
-            <div style="flex:2;"><label>Proveedor (Opcional / Requerido si es a crédito)</label><input type="text" id="c_proveedor" placeholder="Nombre de proveedor / marca"></div>
-            <div style="flex:1;"><label>Método de Pago</label><select id="c_metodo_pago" style="border-color:var(--warning); font-weight:bold;"><option value="Efectivo">Efectivo (Resta a Caja)</option><option value="Tarjeta">Tarjeta / Banco</option><option value="Por Pagar">A Crédito (Por Pagar)</option></select></div>
-
-        </div>
-    </div>
-    <button class="btn-final" style="background:var(--p); grid-column: span 3;" onclick="manualAddToList()">Añadir a Lista</button>
-</div>
+            <div class="c-grid">
+                <div style="grid-column: span 2;"><label>Nombre</label><input type="text" id="c_nom" onkeydown="focoC(event, 'c_dep', 'c_cod')"></div>
+                <div><label>Departamento</label><input type="text" id="c_dep" placeholder="Ej. Abarrotes" value="General" onkeydown="focoC(event, 'c_tipo', 'c_nom')"></div>
+                <div><label>Tipo</label><select id="c_tipo" onkeydown="focoC(event, 'c_cos', 'c_dep')"><option value="pieza">UNIDAD</option><option value="granel">GRANEL</option></select></div>
+                <div><label>Costo</label><input type="number" id="c_cos" step="0.01" value="0" oninput="actualizarCalculosCompra()" onkeydown="focoC(event, 'c_iva', 'c_tipo')"></div>
+                <div><label>IVA/ISR %</label><input type="number" id="c_iva" step="0.01" value="0" oninput="actualizarCalculosCompra()" onkeydown="focoC(event, 'c_gan', 'c_cos')"></div>
+                <div><label style="color:var(--s); font-weight:bold;">Costo Real</label><input type="number" id="c_real" readonly style="background:#e9ecef; font-weight:bold; border-color:var(--s);"></div>
+                
+                <div><label style="color:var(--p); font-weight:bold;">% Ganancia</label><input type="number" id="c_gan" value="30" oninput="calcVentaDesdeGanancia()" onkeydown="focoC(event, 'c_pv', 'c_iva')"></div>
+                <div><label>P. Venta</label><input type="number" id="c_pv" oninput="calcGananciaDesdeVenta()" onkeydown="focoC(event, 'c_pm', 'c_gan')"></div>
+                
+                <div><label>P. Mayo</label><input type="number" id="c_pm" onkeydown="focoC(event, 'c_md', 'c_pv')"></div>
+                <div><label>Min Mayo</label><input type="number" id="c_md" value="10" onkeydown="focoC(event, 'c_cant', 'c_pm')"></div>
+                
+                <div style="grid-column: span 3; background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba;">
+                    <div style="display:flex; gap:15px; align-items:flex-end;">
+                        <div style="flex:1;"><label>Cant. a Cargar</label><input type="number" id="c_cant" value="1" onkeydown="focoC(event, 'add', 'c_pv')"></div>
+                        <div style="flex:2;"><label>Proveedor (Opcional)</label><input type="text" id="c_proveedor" placeholder="Nombre de proveedor" onkeydown="focoC(event, 'c_metodo_pago', 'c_cant')"></div>
+                        <div style="flex:1;"><label>Método de Pago</label><select id="c_metodo_pago" style="border-color:var(--warning); font-weight:bold;" onkeydown="focoC(event, 'add', 'c_proveedor')"><option value="Efectivo">Efectivo (Resta a Caja)</option><option value="Tarjeta">Tarjeta / Banco</option><option value="Por Pagar">A Crédito (Por Pagar)</option></select></div>
+                    </div>
+                </div>
+                <button id="add" class="btn-final" style="background:var(--p); grid-column: span 3;" onclick="manualAddToList()">Añadir a Lista (Enter)</button>
+            </div>
             <table class="tabla-pos">
-    <thead style="background:#f8f9fa;">
-        <tr>
-            <th style="text-align:left; color:#666;">Producto</th>
-            <th style="text-align:left; color:#666;">Cantidad</th>
-            <th style="text-align:left; color:#666;">Costo Unit.</th>
-            <th style="text-align:left; color:#666;">Subtotal Costo</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody id="c_lista_tab"></tbody>
-</table>
+                <thead style="background:#f8f9fa;"><tr><th style="text-align:left; color:#666;">Producto</th><th style="text-align:left; color:#666;">Cantidad</th><th style="text-align:left; color:#666;">Costo Unit.</th><th style="text-align:left; color:#666;">Desc. %</th><th style="text-align:left; color:var(--p);">Precio Vta.</th><th style="text-align:left; color:#666;">Subtotal</th><th></th></tr></thead>
+                <tbody id="c_lista_tab"></tbody>
+            </table>
         </div>
         <div class="panel-der">
             <div class="sub-total">CARGA A: <span class="lbl-suc-act">MATRIZ</span></div>
             <div class="total-big" style="color:var(--warning)">$<span id="c_total_inv">0.00</span></div>
-            <button class="btn-final" onclick="finalizarCompra()">FINALIZAR COMPRA</button>
+            <button class="btn-final" onclick="finalizarCompra()">FINALIZAR COMPRA [F12]</button>
         </div>
     </div>
 </div>
@@ -434,15 +449,7 @@
             <div class="c-grid" style="border-color: var(--kit);">
                 <div><label>CÓDIGO (Kit o Grupo)</label><input type="text" id="k_cod"></div>
                 <div style="grid-column: span 2;"><label>NOMBRE</label><input type="text" id="k_nom"></div>
-                
-                <div>
-                    <label>TIPO DE AGRUPACIÓN</label>
-                    <select id="k_tipo_creacion" style="border-color:var(--kit); font-weight:bold;">
-                        <option value="kit">📦 KIT (Armar un paquete)</option>
-                        <option value="grupo">🔗 GRUPO (Compartir mismo stock)</option>
-                    </select>
-                </div>
-                
+                <div><label>TIPO DE AGRUPACIÓN</label><select id="k_tipo_creacion" style="border-color:var(--kit); font-weight:bold;"><option value="kit">📦 KIT (Armar un paquete)</option><option value="grupo">🔗 GRUPO (Compartir mismo stock)</option></select></div>
                 <div><label>P. VENTA</label><input type="number" id="k_pv"></div>
             </div>
             <div style="background: #f8f9fa; padding:15px; border-radius:10px; margin-top:20px;">
@@ -463,32 +470,23 @@
     <div style="padding:25px;">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:20px;">
            <div style="display:flex; align-items:center;">
-    <h2 style="margin:0;">Catálogo (<span class="lbl-suc-act" style="color:var(--p)">Matriz</span>)</h2>
-    <div id="admin_total_inv_container" style="display:none; background:#1a1d20; color:#ffc107; padding:6px 15px; border-radius:8px; font-weight:bold; border: 1px solid #444; margin-left: 15px; font-size:14px;">
-        💰 VALOR TOTAL: $<span id="lbl_total_inv_cost">0.00</span>
-    </div>
-</div>
-
+                <h2 style="margin:0;">Catálogo (<span class="lbl-suc-act" style="color:var(--p)">Matriz</span>)</h2>
+                <div id="admin_total_inv_container" style="display:none; background:#1a1d20; color:#ffc107; padding:6px 15px; border-radius:8px; font-weight:bold; border: 1px solid #444; margin-left: 15px; font-size:14px;">
+                    💰 VALOR TOTAL: $<span id="lbl_total_inv_cost">0.00</span>
+                </div>
+            </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="abrirModalRecepciones()" style="background:var(--orange); color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">📦 RECEPCIONES (<span id="lbl_recepciones_count">0</span>)</button>
                 <button onclick="abrirTransferencia()" style="background:var(--kit); color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">🚚 ENVIAR</button>
-
                 <button onclick="reiniciarFaltantes()" style="background:var(--danger); color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">🔄 RESET FALTANTES</button>
-<button onclick="abrirAuthReiniciarInv()" style="background:#343a40; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">🚨 STOCK A CERO</button>
+                <button onclick="abrirAuthReiniciarInv()" style="background:#343a40; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">🚨 STOCK A CERO</button>
                 <button onclick="document.getElementById('modalImport').style.display='block'" style="background:var(--p); color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">📥 EXCEL</button>
             </div>
         </div>
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
             <input type="text" id="buscar_inv" placeholder="🔍 Buscar por código o nombre..." onkeyup="filtrarInventario(false, event)" style="flex: 2; font-size:16px; padding:12px;">
-            <select id="filtro_dep" onchange="filtrarInventario()" style="flex: 1; font-size:14px; padding:10px;">
-                <option value="">📁 Todos los Deptos</option>
-            </select>
-            <select id="filtro_tipo" onchange="filtrarInventario()" style="flex: 1; font-size:14px; padding:10px;">
-                <option value="">📦 Todos los Tipos</option>
-                <option value="pieza">Unidad (Pieza)</option>
-                <option value="granel">Granel</option>
-                <option value="kit">Kit</option>
-            </select>
+            <select id="filtro_dep" onchange="filtrarInventario()" style="flex: 1; font-size:14px; padding:10px;"><option value="">📁 Todos los Deptos</option></select>
+            <select id="filtro_tipo" onchange="filtrarInventario()" style="flex: 1; font-size:14px; padding:10px;"><option value="">📦 Todos los Tipos</option><option value="pieza">Unidad (Pieza)</option><option value="granel">Granel</option><option value="kit">Kit</option></select>
         </div>
         <div style="height:calc(100vh - 220px); overflow-y:auto; border: 1px solid #ddd; border-radius:8px;">
             <table class="tabla-pos" style="margin-top:0;">
@@ -539,8 +537,6 @@
 
 <div id="r-tab" class="tabcontent no-print">
     <div style="padding:15px; max-width: 1400px; margin: 0 auto;">
-        
-        <!-- BARRA DE FILTROS -->
         <div style="display:flex; gap:10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-wrap: wrap;">
             <div style="flex:1; min-width:120px"><label style="font-size:11px; font-weight:bold; color:#666">FECHA INICIO:</label><input type="date" id="corte_fecha_inicio" onchange="renderCorte()"></div>
             <div style="flex:1; min-width:120px"><label style="font-size:11px; font-weight:bold; color:#666">FECHA FIN:</label><input type="date" id="corte_fecha_fin" onchange="renderCorte()"></div>
@@ -554,7 +550,6 @@
             <button onclick="registrarPrecorte()" style="flex:1; background:#17a2b8; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; cursor:pointer;">✂️ Hacer Precorte</button>
         </div>
 
-        <!-- KPIs PRINCIPALES -->
         <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom: 20px;">
             <div style="background:white; padding:20px; border-radius:10px; border-left: 5px solid #007bff; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <h4 style="color:#666; margin:0 0 5px 0; font-size:13px; text-transform:uppercase;">Ventas Totales</h4>
@@ -580,7 +575,6 @@
             </div>
         </div>
 
-        <!-- GRÁFICAS -->
         <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <h3 style="margin-top:0; color:var(--p);">📈 Ventas vs Ganancia (Por Día)</h3>
             <div style="width:100%; height: 300px;"><canvas id="chartVentasDiarias"></canvas></div>
@@ -613,7 +607,6 @@
             </div>
         </div>
 
-        <!-- FLUJO DE EFECTIVO -->
         <h3 style="color:#17a2b8; margin-top:30px;">🔄 Desglose de Flujo (Caja/Bancos)</h3>
         <div class="flujo-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom: 30px;">
             <div style="background:#f2f9f2; border: 1px solid #d4ebd4; border-radius:8px; padding:20px;">
@@ -632,7 +625,6 @@
             </div>
         </div>
 
-        <!-- TOP 10 -->
         <div style="background:white; padding:20px; border-radius:10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <h3 style="margin-top:0; color:var(--p);">🏆 Top 10 Productos Más Vendidos</h3>
             <div class="table-responsive">
@@ -643,7 +635,6 @@
             </div>
         </div>
 
-        <!-- CORTE DE CAJA -->
         <div class="dash-card" style="border-top: 5px solid var(--s); margin-bottom: 20px; background: #f8fdf9;">
             <h3 style="margin-top:0; color:var(--s);">💰 Corte de Caja Físico</h3>
             <div class="corte-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;">
@@ -655,7 +646,6 @@
             </div>
         </div>
 
-        <!-- ANALISIS TRANSFERENCIAS -->
         <div class="dash-card" style="margin-bottom: 20px; border-top: 4px solid var(--kit); background: #fff;">
             <h3 style="margin-top:0; color:var(--kit);">🚚 Transferencias de Mercancía</h3>
             <div class="trans-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:15px;">
@@ -663,9 +653,14 @@
                 <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; text-align:center;"><h4 style="color:#666; font-size:11px; margin:0">RECIBIDA</h4><p id="d_trans_rec_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:var(--s)">$0.00</p></div>
                 <div style="background:#fff3cd; padding:15px; border-radius:8px; border:1px solid #ffeeba; text-align:center;"><h4 style="color:#856404; font-size:11px; margin:0">EN TRÁNSITO</h4><p id="d_trans_pen_val" style="font-size:24px; font-weight:bold; margin:5px 0; color:#856404">$0.00</p></div>
             </div>
+            <div class="table-responsive" style="height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+                <table class="tabla-pos" style="margin:0; width:100%; text-align:left; font-size:13px;">
+                    <thead style="background:#f1f1f1;"><tr><th>Fecha</th><th>Ruta (Origen ➡️ Destino)</th><th>Estado</th><th>Costo Mvto.</th></tr></thead>
+                    <tbody id="d_lista_transferencias"></tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- HISTORIAL DE TICKETS -->
         <h3 style="color:var(--d)">Detalle de Operaciones (Ventas, Abonos y Gastos)</h3>
         <div class="table-responsive" style="height: 300px; background: white; border-radius: 10px; border: 1px solid #ddd;">
             <table class="tabla-pos" style="margin:0;">
@@ -673,7 +668,6 @@
                 <tbody id="r_lista_ventas"></tbody>
             </table>
         </div>
-
     </div>
 </div>
 
@@ -701,11 +695,9 @@
                     <label><input type="checkbox" id="chk_v-tab" checked> 🛒 Ventas y Cobro</label><label><input type="checkbox" id="chk_c-tab"> 📥 Compras/Ingreso</label>
                     <label><input type="checkbox" id="chk_prov-tab"> 🚚 Proveedores</label><label><input type="checkbox" id="chk_k-tab"> 📦 Kits</label>
                     <label><input type="checkbox" id="chk_i-tab"> 📋 Inventario</label><label><input type="checkbox" id="chk_cli-tab"> 👥 Clientes y Créditos</label>
-                    <label><input type="checkbox" id="chk_pro-tab"> 🏷️ Promociones</label><label><input type="checkbox" id="chk_r-tab">
- 📊 Dashboard y Cortes</label>
-<label><input type="checkbox" id="chk_rec-tab" checked> 📱 Recargas Multimarca</label>
+                    <label><input type="checkbox" id="chk_pro-tab"> 🏷️ Promociones</label><label><input type="checkbox" id="chk_r-tab"> 📊 Dashboard y Cortes</label>
+                    <label><input type="checkbox" id="chk_rec-tab" checked> 📱 Recargas Multimarca</label>
                     <label><input type="checkbox" id="chk_u-tab"> ⚙️ Configuración (Ajustes)</label>
-
                 </div>
                 <button class="btn-final" style="background:var(--p); width:100%; margin-top:20px;" onclick="guardarUsuario()">💾 GUARDAR USUARIO</button>
             </div>
@@ -718,9 +710,11 @@
                 <label style="font-size:11px; font-weight:bold; color:var(--p)">NOMBRE DE LA TIENDA / EMPRESA:</label><input type="text" id="cfg_nombre" style="margin-bottom: 15px; font-size:18px; font-weight:bold;" placeholder="Ej. Abarrotes La Principal">
                 <label style="font-size:11px; font-weight:bold; color:var(--p)">DIRECCIÓN Y TELÉFONO (DETALLES):</label><textarea id="cfg_detalles" rows="3" style="margin-bottom: 15px;" placeholder="Dirección completa, Teléfono, RFC..."></textarea>
                 <label style="font-size:11px; font-weight:bold; color:var(--p)">MENSAJE DE AGRADECIMIENTO (PIE DE PÁGINA):</label><textarea id="cfg_mensaje" rows="2" placeholder="Ej. ¡Gracias por su preferencia!"></textarea>
+<label style="font-size:11px; font-weight:bold; color:var(--p); margin-top:10px; display:block;">TAMAÑO DE LETRA DEL TICKET (Recomendado: 12 a 16):</label>
+<input type="number" id="cfg_font" value="14" style="margin-bottom: 15px; font-size:18px; font-weight:bold; text-align:center;">
                 <button class="btn-final" style="background:var(--p); margin-top:20px;" onclick="guardarConfigTicket()">💾 GUARDAR FORMATO</button>
             </div>
-<div class="dash-card" style="border-top:4px solid var(--info); margin-top:20px;">
+            <div class="dash-card" style="border-top:4px solid var(--info); margin-top:20px;">
                 <h3 style="margin-top:0; color:var(--info);">🏢 Gestión de Sucursales</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
                     <input type="text" id="nueva_sucursal_nom" placeholder="Nombre de nueva sucursal..." style="flex:2">
@@ -818,7 +812,6 @@
     <div class="modal-content" style="width:600px">
         <h3 style="margin-top:0; color:var(--p);">✏️ Editar Producto</h3>
         
-        <!-- Bolsillo secreto para el código viejo -->
         <input type="hidden" id="e_cod_original">
         
         <div class="c-grid">
@@ -858,8 +851,8 @@
         
         <div id="m_restante_div" style="font-size:20px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:15px; background:#fff5f5; padding:5px; border-radius:8px; border:1px dashed var(--danger);">Falta: $0.00</div>
         
-        <label>MÉTODO DE PAGO:</label>
-        <select id="m_metodo" onchange="checkMetodoCobro()" style="margin-bottom:10px; font-weight:bold;">
+        <label>MÉTODO DE PAGO <small style="color:#888;">(Flechas para cambiar, Enter para avanzar)</small>:</label>
+        <select id="m_metodo" onchange="checkMetodoCobro()" onkeydown="focoCobro(event, 'm_recibido')" style="margin-bottom:10px; font-weight:bold;">
             <option value="Efectivo">Efectivo</option>
             <option value="Tarjeta">Tarjeta</option>
             <option value="Transferencia">Transferencia</option>
@@ -868,12 +861,12 @@
         
         <div id="div_cobro_cliente" style="display:none; margin-bottom:10px; background:#fff3cd; padding:10px; border-radius:8px;">
             <label style="color:#856404; font-size:12px; font-weight:bold;">CLIENTE PARA CRÉDITO:</label>
-            <select id="m_cliente_select" style="border-color:#ffeeba;"></select>
+            <select id="m_cliente_select" onkeydown="focoCobro(event, 'm_recibido')" style="border-color:#ffeeba;"></select>
         </div>
         
         <div id="div_cobro_recibido">
-            <label>MONTO A RECIBIR/ABONAR:</label>
-            <input type="number" id="m_recibido" oninput="calcCambio()" onkeypress="if(event.key==='Enter') { event.preventDefault(); agregarPagoVenta(); }" style="font-size:24px; font-weight:bold; color:var(--p); text-align:center;">
+            <label>MONTO A RECIBIR/ABONAR <small style="color:#888;">(Flecha arriba para método)</small>:</label>
+            <input type="number" id="m_recibido" oninput="calcCambio()" onkeydown="if(event.key==='ArrowUp'){event.preventDefault(); document.getElementById(document.getElementById('m_metodo').value === 'Crédito' ? 'm_cliente_select' : 'm_metodo').focus();} else focoCobro(event, 'add')" style="font-size:24px; font-weight:bold; color:var(--p); text-align:center;">
             <div id="m_cambio" style="text-align:right; font-weight:bold; margin:10px 0; color:#555;">Cambio: $0.00</div>
         </div>
 
@@ -903,7 +896,26 @@
         </div>
     </div>
 </div>
-
+<div id="modalTicket" class="modal">
+    <div class="modal-content" style="width:350px; text-align:center;">
+        <div id="ticket_print_area" class="print-active">
+            <h2 style="margin: 0; font-size:22px; font-weight:900;" id="ticket_print_nombre">Mi Tienda</h2>
+            <p style="font-size: 11px; color: #555; margin:5px 0;" id="ticket_print_detalles">Dirección y Teléfono</p>
+            <p style="font-size: 11px; font-weight:bold; margin: 10px 0 5px; border-bottom:1px solid #ccc; padding-bottom:5px;">COMPROBANTE DE VENTA</p>
+            <div id="ticket_fecha" style="font-size: 11px; margin-bottom: 10px; text-align: left;"></div>
+            <table style="width: 100%; font-size: 12px; text-align: left; border-collapse: collapse;">
+                <thead><tr style="border-bottom: 1px dashed #ccc;"><th>Cant</th><th>Desc.</th><th style="text-align:right">Importe</th></tr></thead><tbody id="ticket_items"></tbody>
+            </table>
+            <div style="border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; text-align: right; font-size: 16px;"><b>TOTAL: $<span id="ticket_total">0.00</span></b></div>
+            <div style="text-align: right; font-size: 11px; margin-top: 5px;">Pago: <span id="ticket_metodo"></span><br>Cambio / Deuda: $<span id="ticket_cambio">0.00</span><br>Atendió: <span id="ticket_cajero"></span></div>
+            <p style="font-size: 11px; margin-top:15px; font-weight:bold;" id="ticket_print_mensaje">¡Gracias por su compra!</p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn-final no-print" style="background:#eee; color:#333; flex: 1;" id="btnCerrarTicket" onclick="cerrarModales()">CERRAR (Enter)</button>
+            <button class="btn-final no-print" style="background:var(--p); flex: 1;" onclick="imprimirTicket('ticket_print_area')">🖨️ IMPRIMIR (P)</button>
+        </div>
+    </div>
+</div>
 
 <div id="modalVisor" class="modal">
     <div class="modal-content" style="width:500px; text-align:center; padding: 25px; display: flex; flex-direction: column;">
@@ -920,7 +932,7 @@
             <button class="btn-final" style="width:auto; margin:0; padding:8px 15px; background:#444;" onclick="navVisor(1)">Sig ➡️</button>
         </div>
         
-<div id="visor_print_area" style="padding:0; position:relative; background:#fff; text-align: left; flex-shrink: 0; color:#000; font-family: monospace;">
+        <div id="visor_print_area" style="padding:0; position:relative; background:#fff; text-align: left; flex-shrink: 0; color:#000; font-family: monospace;">
             <div id="visor_sello_anulado" style="display:none; position:absolute; top:30%; left:10%; color:#000; border:5px solid #000; font-size:35px; font-weight:900; transform:rotate(-25deg); padding:10px; pointer-events:none; text-align:center; width: 80%;">ANULADA</div>
             
             <h2 style="margin: 0; text-align: center;" id="visor_print_nombre">Mi Tienda</h2>
@@ -971,7 +983,7 @@
             <button class="btn-final" style="width:auto; margin:0; padding:8px 15px; background:#444;" onclick="navVisorCompras(1)">Sig ➡️</button>
         </div>
         
-       <div id="visor_compras_print_area" style="padding:0; position:relative; background:#fff; text-align: left; color: #000; font-family: monospace; flex-shrink: 0;">
+        <div id="visor_compras_print_area" style="padding:0; position:relative; background:#fff; text-align: left; color: #000; font-family: monospace; flex-shrink: 0;">
             <h2 style="margin: 0; text-align: center;">COMPRA</h2>
             <div id="visor_compras_fecha" style="margin-bottom: 10px; text-align:center; margin-top:5px;"></div>
             
@@ -1014,20 +1026,15 @@
 
         <div style="margin-top:15px; display:flex; gap:10px; align-items: flex-start;">
             
-            <!-- 🔥 CONTENEDOR DEL BUSCADOR INTELIGENTE 🔥 -->
             <div style="flex:3; position:relative;">
                 <input type="text" id="t_cod" onkeypress="if(event.key==='Enter') addTransferToList()" onkeyup="filtrarBusquedaTransferencia(event)" onblur="setTimeout(() => document.getElementById('t_sugerencias').style.display='none', 200)" placeholder="Buscar producto (Nombre o Código)..." style="width:100%; height:40px; padding:0 10px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:14px; background:#fff;">
-                <!-- Lista de sugerencias mágica -->
                 <div id="t_sugerencias" style="display:none; position:absolute; top:42px; left:0; width:100%; background:white; border:1px solid #004085; border-radius:5px; max-height:200px; overflow-y:auto; z-index:1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"></div>
             </div>
 
-            <!-- CANTIDAD -->
             <input type="number" id="t_cant" value="1" style="flex:1; height:40px; padding:0 10px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:14px;">
             
-            <!-- BOTÓN CÁMARA -->
             <button class="no-print" onclick="abrirEscanerCamara('transferencias')" style="background: #28a745; color: white; border: none; border-radius: 4px; height: 40px; padding: 0 15px; cursor: pointer; font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); white-space: nowrap;" title="Escanear con Cámara">📷</button>
             
-            <!-- BOTÓN AÑADIR (Ya metido en la caja de nuevo) -->
             <button onclick="addTransferToList()" class="btn-final" style="margin:0; background:var(--kit); height:40px; padding: 0 15px; border-radius:4px; font-size:14px; flex:1">AÑADIR</button>
             
         </div>
@@ -1138,6 +1145,7 @@
         </div>
     </div>
 </div>
+
 <div id="modalProdNoEncontrado" class="modal">
     <div class="modal-content" style="width:400px; text-align:center; border-top-color:var(--warning);">
         <h3 style="margin-top:0; color:var(--warning);">⚠️ Producto No Encontrado</h3>
@@ -1149,6 +1157,7 @@
         </div>
     </div>
 </div>
+
 <div id="modalAuthPausada" class="modal">
     <div class="modal-content" style="width:350px; text-align:center; border-top-color:var(--danger)">
         <h3 style="margin-top:0; color:var(--danger);">⚠️ Autorización Requerida</h3>
@@ -1160,6 +1169,7 @@
         </div>
     </div>
 </div>
+
 <div id="modalAjusteStock" class="modal">
     <div class="modal-content" style="width:400px; text-align:center; border-top-color:var(--info)">
         <h3 style="margin-top:0; color:var(--info);">📦 Ajuste Manual de Stock</h3>
@@ -1187,30 +1197,21 @@
         </div>
     </div>
 </div>
-<!-- MODAL: ANÁLISIS E HISTORIAL DE COMPRAS -->
+
 <div id="modal_analisis_compras" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#fff; width:95%; max-width:900px; border-radius:8px; padding:20px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
-        
-        <!-- Encabezado -->
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;">
             <h2 style="margin:0; color:#333; font-size: 20px;">📊 Análisis de Compras</h2>
             <button onclick="cerrarModalAnalisisCompras()" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">❌ Cerrar</button>
         </div>
-        
-        <!-- Barra de Filtros y Excel -->
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items: center;">
             <label style="font-weight:bold; font-size:14px;">Desde:</label>
             <input type="date" id="filtro_compra_inicio" style="padding:6px; border:1px solid #ccc; border-radius:4px; font-family:inherit;">
-            
             <label style="font-weight:bold; font-size:14px;">Hasta:</label>
             <input type="date" id="filtro_compra_fin" style="padding:6px; border:1px solid #ccc; border-radius:4px; font-family:inherit;">
-            
-            <button onclick="cargarDatosAnalisisCompras()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">🔍 Filtrar</button>
-            
+            <button onclick="cargarDatosAnalisisCompras()" style="background:#007bff; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">🔍 Filtrar</button>
             <button onclick="exportarComprasExcel()" style="background:#28a745; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; margin-left:auto;">📗 Exportar a Excel</button>
         </div>
-
-        <!-- Tabla de Datos -->
         <div style="flex-grow:1; overflow-y:auto; border:1px solid #ddd; border-radius:4px; min-height: 200px;">
             <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
                 <thead style="background:#f8f9fa; position:sticky; top:0; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);">
@@ -1219,53 +1220,38 @@
                         <th style="padding:12px; border-bottom:2px solid #ddd;">Proveedor</th>
                         <th style="padding:12px; border-bottom:2px solid #ddd; text-align:center;">Cant. Productos</th>
                         <th style="padding:12px; border-bottom:2px solid #ddd; text-align:right;">Total ($)</th>
-                        <th style="padding:12px; border-bottom:2px solid #ddd;">Detalle (Qué se compró)</th>
+                        <th style="padding:12px; border-bottom:2px solid #ddd;">Detalle</th>
                     </tr>
                 </thead>
-                <tbody id="body_analisis_compras">
-                    <!-- Los datos aparecerán aquí por arte de magia JS -->
-                </tbody>
+                <tbody id="body_analisis_compras"></tbody>
             </table>
         </div>
-        
-        <!-- Totalizador Inferior -->
         <div style="margin-top:15px; text-align:right; font-size:20px; font-weight:bold; color:#333; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #eee;">
-            Inversión del Periodo: $<span id="total_analisis_compras" style="color: var(--primary);">0.00</span>
+            Inversión del Periodo: $<span id="total_analisis_compras" style="color: #007bff;">0.00</span>
         </div>
     </div>
 </div>
-<!-- VENTANA EMERGENTE PARA LA CÁMARA -->
+
 <div id="modal_escaner" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; flex-direction:column;">
     <div style="background:white; padding:15px; border-radius:10px; width:95%; max-width:400px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
         <h3 style="margin-top:0; color: var(--p);">📸 Escanear Producto</h3>
-        
-        <!-- Aquí se dibujará la cámara -->
         <div id="lector_camara" style="width:100%; min-height: 250px;"></div>
-        
         <button onclick="cerrarEscanerCamara()" style="margin-top:15px; padding:10px 20px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer; font-size: 16px; font-weight: bold; width: 100%;">❌ Cancelar / Cerrar</button>
     </div>
 </div>
-<!-- MODAL PARA PEDIR PIN DE FORMA SEGURA (PUNTITOS) -->
+
 <div id="modal_pin_seguro" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#fff; width:90%; max-width:320px; border-radius:8px; padding:20px; box-shadow:0 5px 15px rgba(0,0,0,0.3); text-align:center;">
-        
         <h3 style="margin-top:0; color:#dc3545;">🔒 Acceso Restringido</h3>
         <p style="font-size:14px; color:#555;">Ingresa el PIN de Administrador para autorizar la anulación:</p>
-        
-        <!-- Ahora puedes presionar la tecla Enter -->
         <input type="password" id="input_pin_seguro" onkeydown="if(event.key === 'Enter') verificarPinYCancelar()" style="width:100%; padding:10px; margin:10px 0; border:2px solid #ccc; border-radius:5px; font-size:24px; text-align:center; box-sizing:border-box; letter-spacing: 5px;" placeholder="****">
-        
         <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
             <button onclick="cerrarModalPinSeguro()" style="background:#6c757d; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; font-weight:bold; flex:1;">Cancelar</button>
-            
             <button onclick="verificarPinYCancelar()" style="background:#dc3545; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; font-weight:bold; flex:1;">Autorizar</button>
         </div>
     </div>
 </div>
 
-<!-- ==================================================================== -->
-<!-- === MODAL: CALCULADORA DE CAJA GLOBAL (COMPLETO Y CON ENTER) ======= -->
-<!-- ==================================================================== -->
 <div id="modalCaja" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:white; padding:25px; border-radius:10px; width:420px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: sans-serif;">
         <h3 style="margin-top:0; color:#004085;">📦 Comprar por Caja</h3>
@@ -1273,7 +1259,6 @@
         <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#555;">1. Buscar Producto (Nombre o Código):</label>
         <div style="display:flex; gap:8px; margin-bottom:5px; position:relative;">
             <div style="flex:1; position:relative;">
-                <!-- Salta a cantidad -->
                 <input type="text" id="caja_codigo" onkeydown="focoCajaEnter(event, 'caja_cantidad')" onkeyup="filtrarBusquedaCaja(event)" onchange="buscarProdCaja()" onblur="setTimeout(() => document.getElementById('caja_sugerencias').style.display='none', 200)" placeholder="Ej. Coca Cola..." style="width:100%; padding:10px; border:2px solid #004085; border-radius:5px; box-sizing:border-box; font-size:16px; background:#f0f8ff;">
                 <div id="caja_sugerencias" style="display:none; position:absolute; top:45px; left:0; width:100%; background:white; border:1px solid #004085; border-radius:5px; max-height:160px; overflow-y:auto; z-index:1000; box-shadow: 0 4px 6px rgba(0,0,0,0.2);"></div>
             </div>
@@ -1285,12 +1270,10 @@
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <div style="flex:1;">
                 <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#555;">2. Cajas a Comprar:</label>
-                <!-- Salta a costo -->
                 <input type="number" id="caja_cantidad" onkeydown="focoCajaEnter(event, 'caja_costo_total')" onkeyup="calcularCaja()" onchange="calcularCaja()" value="1" min="1" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-size:16px;">
             </div>
             <div style="flex:1;">
                 <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#555;">3. Costo de 1 Caja ($):</label>
-                <!-- Salta a piezas -->
                 <input type="number" id="caja_costo_total" onkeydown="focoCajaEnter(event, 'caja_piezas')" onkeyup="calcularCaja()" onchange="calcularCaja()" placeholder="Ej. 1200" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-size:16px;">
             </div>
         </div>
@@ -1298,17 +1281,14 @@
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <div style="flex:1;">
                 <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#555;">4. Piezas por Caja:</label>
-                <!-- Salta a impuesto -->
                 <input type="number" id="caja_piezas" onkeydown="focoCajaEnter(event, 'caja_impuesto')" onkeyup="calcularCaja()" onchange="calcularCaja()" placeholder="Ej. 12" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-size:16px;">
             </div>
             <div style="flex:1;">
                 <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:13px; color:#555;">5. Impuesto (%):</label>
-                <!-- Salta al botón -->
                 <input type="number" id="caja_impuesto" onkeydown="focoCajaEnter(event, 'btn_agregar_caja')" onkeyup="calcularCaja()" onchange="calcularCaja()" value="0" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-size:16px;">
             </div>
         </div>
 
-        <!-- 🔥 AQUÍ ESTÁ EL CUADRO AZUL QUE FALTABA 🔥 -->
         <div style="background:#f8f9fa; border-left:4px solid #17a2b8; padding:15px; border-radius:5px; margin-bottom:20px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:#666;">
                 <span>Total de Piezas (Unidades):</span> <strong id="lbl_caja_total_piezas" style="color:#17a2b8;">0</strong>
@@ -1327,7 +1307,6 @@
         </div>
     </div>
 </div>
-
 <script>
 // === 1. CONEXIÓN A POCKETBASE EN LA NUBE ===
 const pb = new PocketBase('https://sexy-starling.pikapod.net');
@@ -1663,6 +1642,18 @@ db.collection("ventas").onSnapshot((querySnapshot) => {
     if (tabActual === 'r-tab') renderCorte();
 });
 
+// 🛍️ Compras (EL MOTOR EN TIEMPO REAL PARA LA NUBE)
+db.collection("compras").onSnapshot((querySnapshot) => {
+    compras = [];
+    querySnapshot.forEach((doc) => { compras.push(doc.data()); });
+    compras.sort((a,b) => a.id - b.id);
+    localStorage.setItem("pos_compras_local", JSON.stringify(compras));
+    
+    // Si tienes el historial de compras abierto, que se actualice solo
+    if (document.getElementById('modalVisorCompras') && document.getElementById('modalVisorCompras').style.display === 'block') {
+        if(typeof filtrarVisorCompras === 'function') filtrarVisorCompras();
+    }
+});
 // 📦 Transferencias
 db.collection("transferencias").onSnapshot((querySnapshot) => {
     transferencias = [];
@@ -1807,7 +1798,7 @@ async function sincronizarComprasPocketBase() {
 window.onload = () => { 
     // 🔥 LAS DOS NUEVAS FUNCIONES MÁGICAS VAN AQUÍ AL PRINCIPIO 🔥
     cargarFondosDesdeNube(); 
-    sincronizarComprasPocketBase();
+  
 
    document.querySelectorAll('.modal').forEach(m => document.body.appendChild(m));
 
@@ -1891,23 +1882,25 @@ function calcGananciaDesdeVenta() {
 function cargarConfigEnUI() {
     // 1. Cargar datos en la pestaña de Ajustes
     let sucAEditar = document.getElementById('cfg_sucursal') ? document.getElementById('cfg_sucursal').value : sucursalActual;
-    let cfg = configTienda[sucAEditar] || { nombre: "Mi Tienda", detalles: "", mensaje: "" };
+    let cfg = configTienda[sucAEditar] || { nombre: "Mi Tienda", detalles: "", mensaje: "", fontSize: 14 };
     
-    if (document.getElementById('cfg_nombre')) document.getElementById('cfg_nombre').value = cfg.nombre; 
-    if (document.getElementById('cfg_detalles')) document.getElementById('cfg_detalles').value = cfg.detalles; 
-    if (document.getElementById('cfg_mensaje')) document.getElementById('cfg_mensaje').value = cfg.mensaje;
+    if (document.getElementById('cfg_nombre')) document.getElementById('cfg_nombre').value = cfg.nombre || "Mi Tienda"; 
+    if (document.getElementById('cfg_detalles')) document.getElementById('cfg_detalles').value = cfg.detalles || ""; 
+    if (document.getElementById('cfg_mensaje')) document.getElementById('cfg_mensaje').value = cfg.mensaje || "";
+    if (document.getElementById('cfg_font')) document.getElementById('cfg_font').value = cfg.fontSize || 14;
 
-    // 2. 🔥 APLICAR AL TICKET FÍSICO QUE SE VA A IMPRIMIR 🔥
-    // Aquí siempre usamos la sucursal en la que estamos trabajando, no la que se está editando
-    let cfgActual = configTienda[sucursalActual] || { nombre: "Mi Tienda", detalles: "", mensaje: "¡Gracias por su compra!" };
+    // 2. APLICAR AL TICKET FÍSICO QUE SE VA A IMPRIMIR
+    let cfgActual = configTienda[sucursalActual] || { nombre: "Mi Tienda", detalles: "", mensaje: "¡Gracias por su compra!", fontSize: 14 };
     
-    if(document.getElementById('ticket_print_nombre')) document.getElementById('ticket_print_nombre').innerText = cfgActual.nombre;
-    if(document.getElementById('ticket_print_detalles')) document.getElementById('ticket_print_detalles').innerText = cfgActual.detalles;
-    if(document.getElementById('ticket_print_mensaje')) document.getElementById('ticket_print_mensaje').innerText = cfgActual.mensaje;
-    
-    // Y también lo aplicamos al Historial de Tickets (Visor)
-    if(document.getElementById('visor_print_nombre')) document.getElementById('visor_print_nombre').innerText = cfgActual.nombre;
+    if(document.getElementById('ticket_print_nombre')) document.getElementById('ticket_print_nombre').innerText = cfgActual.nombre || "Mi Tienda";
+    if(document.getElementById('ticket_print_detalles')) document.getElementById('ticket_print_detalles').innerText = cfgActual.detalles || "";
+    if(document.getElementById('ticket_print_mensaje')) document.getElementById('ticket_print_mensaje').innerText = cfgActual.mensaje || "¡Gracias por su compra!";
+    if(document.getElementById('visor_print_nombre')) document.getElementById('visor_print_nombre').innerText = cfgActual.nombre || "Mi Tienda";
+
+    // 🔥 INYECTAR EL TAMAÑO DE LETRA AL SISTEMA 🔥
+    document.documentElement.style.setProperty('--ticket-font', (cfgActual.fontSize || 14) + 'px');
 }
+
 function guardarConfigTicket() {
     let sucAEditar = document.getElementById('cfg_sucursal').value;
     if(!configTienda[sucAEditar]) configTienda[sucAEditar] = {};
@@ -1916,15 +1909,16 @@ function guardarConfigTicket() {
     configTienda[sucAEditar].detalles = document.getElementById('cfg_detalles').value.trim();
     configTienda[sucAEditar].mensaje = document.getElementById('cfg_mensaje').value.trim();
     
-    // Guardar localmente
+    // Guardamos el tamaño de letra (Si lo dejan vacío, usa 14 por defecto)
+    configTienda[sucAEditar].fontSize = parseInt(document.getElementById('cfg_font').value) || 14;
+    
     localStorage.setItem("pos_config_v11", JSON.stringify(configTienda));
     
-    // 🔥 MAGIA NUBE: Subir a PocketBase
     if (typeof db !== 'undefined') {
         db.collection("config").doc("ticket").set(configTienda)
         .then(() => {
-            alert(`✅ Formato de Ticket guardado en la NUBE para ${sucAEditar}`);
-            cargarConfigEnUI(); // Refresca los tickets visualmente
+            alert(`✅ Formato y Tamaño de Ticket guardado en la NUBE para ${sucAEditar}`);
+            cargarConfigEnUI(); 
         })
         .catch(err => {
             console.error("Error al guardar ticket:", err);
@@ -2286,10 +2280,10 @@ function renderV() {
             // Reemplazamos la celda de precio por un input editable
             return `<tr style="${bgRow}">
                 <td>${isFocused ? '👉 ' : ''}${printName} ${badge}</td>
-                <td><input type="number" value="${x.can}" style="width:60px" onchange="carV[${i}].can=parseFloat(this.value)||1;renderV()"></td>
-                <td>$<input type="number" value="${unitPrice}" style="width:80px; font-weight:bold; color:var(--p); border: 1px solid #ccc; padding: 5px; border-radius: 4px;" onchange="carV[${i}].precioManual=parseFloat(this.value)||0;renderV()"></td>
+                <td><input type="number" value="${x.can}" style="width:60px" onchange="carV[${i}].can=parseFloat(this.value)||1; renderV(); document.getElementById('v_cod').focus();"></td>
+                <td>$<input type="number" value="${unitPrice}" style="width:80px; font-weight:bold; color:var(--p); border: 1px solid #ccc; padding: 5px; border-radius: 4px;" onchange="carV[${i}].precioManual=parseFloat(this.value)||0; renderV(); document.getElementById('v_cod').focus();"></td>
                 <td>$${s.toFixed(2)}</td>
-                <td><button onclick="carV.splice(${i},1); focusVentaIndex = Math.min(focusVentaIndex, carV.length - 1); renderV()">✕</button></td>
+                <td><button style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;" onclick="carV.splice(${i},1); focusVentaIndex = Math.min(focusVentaIndex, carV.length - 1); renderV(); document.getElementById('v_cod').focus();">✕</button></td>
             </tr>`;
         }).join(''); 
         document.getElementById('v_total').innerText = t.toFixed(2); 
@@ -2568,11 +2562,8 @@ function renderCorte() {
             </tr>`; 
         }).join(''); 
 
-        // 🔥 NUEVA LÓGICA: Separación de Ingresos y Egresos para el Flujo 🔥
         let ing_efectivo = 0, ret_efectivo = 0;
-        let flujo_ing_otros = 0;
-        let flujo_out_compras = 0;
-        let flujo_out_otros = 0;
+        let flujo_ing_otros = 0, flujo_out_compras = 0, flujo_out_otros = 0;
 
         movimientos.forEach(m => {
             let mFecha = m.fecha || hoy; 
@@ -2586,7 +2577,6 @@ function renderCorte() {
                 } 
                 else if(m.tipo === 'Retiro') {
                     ret_efectivo += montoM;
-                    // Detectar si fue por compra a proveedor
                     if (mMotivo.includes('compra') || mMotivo.includes('proveedor')) {
                         flujo_out_compras += montoM;
                     } else {
@@ -2623,7 +2613,6 @@ function renderCorte() {
         document.getElementById('r_total').innerText = "$"+(ef + ta + trans).toFixed(2); 
         document.getElementById('r_lista_ventas').innerHTML = htmlVentas;
 
-        // 🔥 LLENAR LOS DATOS DEL NUEVO DESGLOSE DE FLUJO 🔥
         if(document.getElementById('flujo_in_efectivo')) {
             document.getElementById('flujo_in_efectivo').innerText = "$" + ef.toLocaleString('es-MX', {minimumFractionDigits: 2});
             document.getElementById('flujo_in_digital').innerText = "$" + (ta + trans).toLocaleString('es-MX', {minimumFractionDigits: 2});
@@ -2631,17 +2620,60 @@ function renderCorte() {
             document.getElementById('flujo_in_total').innerText = "$" + (ef + ta + trans + flujo_ing_otros).toLocaleString('es-MX', {minimumFractionDigits: 2});
 
             document.getElementById('flujo_out_compras').innerText = "$" + flujo_out_compras.toLocaleString('es-MX', {minimumFractionDigits: 2});
-            document.getElementById('flujo_out_proveedores').innerText = "$0.00"; // Si en el futuro separas compras locales vs proveedores
+            document.getElementById('flujo_out_proveedores').innerText = "$0.00"; 
             document.getElementById('flujo_out_otros').innerText = "$" + flujo_out_otros.toLocaleString('es-MX', {minimumFractionDigits: 2});
             document.getElementById('flujo_out_total').innerText = "$" + (flujo_out_compras + flujo_out_otros).toLocaleString('es-MX', {minimumFractionDigits: 2});
         }
+
+        // 👇 NUEVA LÓGICA: CALCULAR Y DIBUJAR TRANSFERENCIAS 👇
+        if (typeof transferencias !== 'undefined' && document.getElementById('d_trans_env_val')) {
+            let tEnvVal = 0, tRecVal = 0, tPenVal = 0;
+            let sucFiltroTrans = fSuc || sucursalActual;
+            
+            let htmlTrans = transferencias.filter(t => {
+                let tDate = new Date(t.id);
+                let tStr = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}-${String(tDate.getDate()).padStart(2, '0')}`;
+                return tStr >= fInicio && tStr <= fFin;
+            }).map(t => {
+                let involucrada = (fSuc === "") ? true : (t.origen === sucFiltroTrans || t.destino === sucFiltroTrans);
+                if (!involucrada) return '';
+
+                let val = parseFloat(t.valor) || 0;
+                
+                if (fSuc === "") { 
+                    tEnvVal += val; // Si vemos el global, sumamos todas como movimiento
+                } else {
+                    if (t.origen === sucFiltroTrans) tEnvVal += val;
+                    if (t.destino === sucFiltroTrans) {
+                        if (t.estado === 'completada') tRecVal += val;
+                        else tPenVal += val;
+                    }
+                }
+
+                let colorEst = t.estado === 'completada' ? '#28a745' : '#856404';
+                return `<tr style="border-bottom:1px solid #eee">
+                    <td>${t.fecha.split(',')[0]}</td>
+                    <td><b>${t.origen}</b> ➡️ <b>${t.destino}</b></td>
+                    <td style="color:${colorEst}; font-weight:bold; text-transform:uppercase;">${t.estado}</td>
+                    <td style="font-weight:bold; color:var(--kit)">$${val.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('d_trans_env_val').innerText = "$" + tEnvVal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('d_trans_rec_val').innerText = "$" + tRecVal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            document.getElementById('d_trans_pen_val').innerText = "$" + tPenVal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+            
+            document.getElementById('d_lista_transferencias').innerHTML = htmlTrans || '<tr><td colspan="4" style="text-align:center; padding:15px; color:#888;">No hay transferencias en este periodo</td></tr>';
+        }
+        // 👆 FIN DE TRANSFERENCIAS 👆
 
         if(typeof actualizarGraficasBI === "function") {
             actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash);
         }
 
     } catch(err) { console.error("Error Dashboard:", err); }
-}function actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash) {
+}
+function actualizarGraficasBI(ventasPorDia, utilPorDia, depsHash, cajerosHash, horasHash) {
     const tooltipOptions = {
         callbacks: {
             label: function(context) {
@@ -2777,9 +2809,9 @@ async function abrirVisorCompras() {
     const modal = document.getElementById('modalVisorCompras');
     if (!modal) return;
 
-    // Ponemos la fecha de hoy por defecto
+   // 🔥 CORRECCIÓN ZONA HORARIA: Usar getFechaLocal() en vez de ISOString
     if (document.getElementById('visor_compras_date')) {
-        document.getElementById('visor_compras_date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('visor_compras_date').value = getFechaLocal();
     }
     
     filtrarVisorCompras();
@@ -3080,23 +3112,31 @@ function imprimirTicket(divId) { document.querySelectorAll('.print-active').forE
 function descontarStock(cod, cant) { let item = inv[cod]; if(!item) return; if(!item.stock) item.stock = {}; if(!item.sold_without_stock) item.sold_without_stock = {}; let disp = Math.max(0, item.stock[sucursalActual] || 0); if(disp >= cant) { item.stock[sucursalActual] = disp - cant; } else { let fal = cant - disp; item.stock[sucursalActual] = 0; item.sold_without_stock[sucursalActual] = (item.sold_without_stock[sucursalActual] || 0) + fal; } }
 function cerrarModales() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); setTimeout(() => { if(tabActual==='v-tab') document.getElementById('v_cod').focus(); if(tabActual==='c-tab') document.getElementById('c_cod').focus(); }, 150); }
 
-// --- PROVEEDORES ---
 function renderProveedores() { 
     let html = ''; 
+    let count = 0;
+    
     Object.keys(proveedores).forEach(nombre => { 
         let p = proveedores[nombre]; 
-        let estadoBadge = p.saldo <= 0 ? '<span style="background:var(--s); color:white; padding:3px 8px; border-radius:12px; font-size:11px; margin-left:10px;">✅ PAGADA</span>' : '';
-        html += `<tr>
-            <td><b>${nombre}</b> ${estadoBadge}</td>
-            <td style="color:${p.saldo > 0 ? 'var(--danger)' : '#000'}; font-weight:bold;">$${(p.saldo||0).toFixed(2)}</td>
-            <td>
-                <button style="background:var(--info); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold;" onclick="abrirHistorialProv('${nombre}')">📋 Historial</button>
-                <button style="background:var(--warning); color:#000; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; margin-left:5px;" onclick="abrirModalAbonoProv('${nombre}')">💸 Abonar</button>
-                <button style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; margin-left:5px;" onclick="abrirModalAuthProv('${nombre}')">🗑️</button>
-            </td>
-        </tr>`; 
+        
+        // 🛡️ FILTRO MÁGICO: Solo mostramos los proveedores de ESTA sucursal
+        // (Si tenías proveedores viejos sin sucursal, los mandará a Matriz para no perderlos)
+        if (p.sucursal === sucursalActual || (!p.sucursal && sucursalActual === 'Matriz')) {
+            count++;
+            let estadoBadge = p.saldo <= 0 ? '<span style="background:var(--s); color:white; padding:3px 8px; border-radius:12px; font-size:11px; margin-left:10px;">✅ PAGADA</span>' : '';
+            html += `<tr>
+                <td><b>${nombre}</b> ${estadoBadge}</td>
+                <td style="color:${p.saldo > 0 ? 'var(--danger)' : '#000'}; font-weight:bold;">$${(p.saldo||0).toFixed(2)}</td>
+                <td>
+                    <button style="background:var(--info); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold;" onclick="abrirHistorialProv('${nombre}')">📋 Historial</button>
+                    <button style="background:var(--warning); color:#000; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; margin-left:5px;" onclick="abrirModalAbonoProv('${nombre}')">💸 Abonar</button>
+                    <button style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-weight:bold; margin-left:5px;" onclick="abrirModalAuthProv('${nombre}')">🗑️</button>
+                </td>
+            </tr>`; 
+        }
     }); 
-    document.getElementById('prov_lista').innerHTML = html || '<tr><td colspan="3" style="text-align:center; padding:20px;">No tienes deudas pendientes con proveedores</td></tr>'; 
+    
+    document.getElementById('prov_lista').innerHTML = count > 0 ? html : `<tr><td colspan="3" style="text-align:center; padding:20px;">No tienes deudas pendientes con proveedores en ${sucursalActual}</td></tr>`; 
 }
 
 function abrirHistorialProv(nombre) {
@@ -3639,6 +3679,24 @@ function actualizarContadorPausadas() {
     let total = pausadas.filter(p => !p.sucursal || p.sucursal === sucursalActual).length;
     lbl.innerText = total;
 }
+
+// === DIRECTOR DE TRÁFICO PARA EL COBRO ===
+function focoCobro(e, nextId) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation(); // 🛑 ESTA ES LA MAGIA: Evita que el Enter rebote y cierre el ticket 🛑
+        
+        if (nextId === 'add') {
+            agregarPagoVenta();
+        } else {
+            let next = nextId;
+            // Si eligió crédito, lo mandamos a elegir cliente primero
+            if (e.target.id === 'm_metodo' && e.target.value === 'Crédito') next = 'm_cliente_select';
+            let nextEl = document.getElementById(next);
+            if (nextEl) { nextEl.focus(); if (nextEl.select) nextEl.select(); }
+        }
+    }
+}
 // NUEVA FUNCIÓN PARA DIBUJAR LA TABLA CON EL ELEMENTO SELECCIONADO
 function renderC() { 
     let t = 0; 
@@ -3887,7 +3945,9 @@ function finalizarCompra() {
 
     if(met === 'Por Pagar') {
         if(!prov) return alert("❌ Debes ingresar el nombre del Proveedor para guardar la deuda a crédito.");
-        if(!proveedores[prov]) proveedores[prov] = { saldo: 0, historial: [] };
+        
+        // 🔥 MAGIA: Si el proveedor es nuevo, le pegamos la etiqueta de la sucursal actual
+        if(!proveedores[prov]) proveedores[prov] = { saldo: 0, historial: [], sucursal: sucursalActual };
         if(!proveedores[prov].historial) proveedores[prov].historial = []; 
         
         proveedores[prov].saldo += totalCompra;
@@ -3990,8 +4050,8 @@ function finalizarCompra() {
     
    // ... (lo anterior igual)
 
-    let idCompra = Date.now();
-    let objetoCompra = { // Creamos el objeto primero para usarlo en ambos lados
+   let idCompra = Date.now();
+    let objetoCompra = { 
         id: idCompra, 
         fecha: getFechaLocal(), 
         hora: new Date().toLocaleTimeString(),
@@ -4000,18 +4060,28 @@ function finalizarCompra() {
         proveedor: prov || "General",
         metodo: met, 
         total: totalCompra, 
-        items: carC // 👈 Nota: el visor busca "items", asegúrate de que se llame así
+        items: carC 
     };
 
-    // 🔥 ESTA LÍNEA ES LA QUE FALTA PARA QUE APAREZCA EN EL HISTORIAL 🔥
+    // Actualización local rápida
     if (typeof compras !== 'undefined') {
         compras.push(objetoCompra);
     } else {
         window.compras = [objetoCompra];
     }
+    localStorage.setItem("pos_compras_local", JSON.stringify(compras));
 
-    // Guardamos en la nube
-    db.collection("compras").doc(String(idCompra)).set(objetoCompra);
+    // 🔥 LA LÍNEA MÁGICA: Subir a la nube con aviso de errores 🔥
+    if (typeof db !== 'undefined') {
+        db.collection("compras").doc(String(idCompra)).set(objetoCompra)
+        .then(() => {
+            console.log("☁️ Compra subida a la nube exitosamente.");
+        })
+        .catch(err => {
+            console.error("Error nube:", err);
+            alert("❌ ALERTA: La base de datos rechazó la compra. ¿Ya creaste la colección 'compras' en PikaPod y abriste los candados?\nDetalle: " + err);
+        });
+    }
 
     carC = []; 
     renderC(); 
@@ -4020,10 +4090,7 @@ function finalizarCompra() {
     
     if (typeof renderDashboard === "function") renderDashboard(); 
     alert("✅ Compra guardada y stock/precios actualizados correctamente."); 
-localStorage.setItem("pos_compras_local", JSON.stringify(compras));
 }
-
-
 function renderI() { 
     try {
         // 1. Lógica de costo total (SOLO PARA EL ADMINISTRADOR)
@@ -4327,6 +4394,26 @@ function confirmarRecepcion() {
 window.onkeydown = (e) => { 
     if(usuarioActual === "") return;
 
+// === NAVEGACIÓN SÚPER RÁPIDA (F1, F2, F3) ===
+    if (e.key === 'F1') {
+        e.preventDefault(); // Bloquea la ventana de Ayuda del navegador
+        let btn = document.getElementById('btn_v-tab');
+        if (btn && window.getComputedStyle(btn).display !== 'none') btn.click();
+        return;
+    }
+    if (e.key === 'F2') {
+        e.preventDefault();
+        let btn = document.getElementById('btn_c-tab');
+        if (btn && window.getComputedStyle(btn).display !== 'none') btn.click();
+        return;
+    }
+    if (e.key === 'F3') {
+        e.preventDefault(); // Bloquea la barra de búsqueda nativa de Google Chrome
+        let btn = document.getElementById('btn_i-tab');
+        if (btn && window.getComputedStyle(btn).display !== 'none') btn.click();
+        return;
+    }
+
     // 1. NAVEGACIÓN EN EL MODAL DEL BUSCADOR (F10)
     if (document.getElementById('modalBuscar').style.display === 'block') {
         if (e.key === 'ArrowDown') { 
@@ -4547,16 +4634,34 @@ asegurarVisibilidadFila();
             }
         }
     }
-    // 4. COMPORTAMIENTO NORMAL DEL ENTER EN OTROS MODALES
-    if(e.key === 'Enter') {
-        if (document.getElementById('modalTicket').style.display === 'block') { e.preventDefault(); cerrarModales(); return; }
-        if (document.getElementById('modalVisor').style.display === 'block') { e.preventDefault(); cerrarModales(); return; }
-        if (document.getElementById('modalPromoAgotada').style.display === 'block') { e.preventDefault(); cerrarModales(); return; }
-        if (document.getElementById('modalMovimiento').style.display === 'block') { e.preventDefault(); guardarMovimiento(); return; }
+   // 4. CONTROL TOTAL DE MODALES SIN MOUSE (Ventas, Visor y Tickets)
+    if (document.getElementById('modalTicket').style.display === 'block') { 
+        if (e.key === 'Enter') { e.preventDefault(); cerrarModales(); return; }
+        if (e.key.toLowerCase() === 'p' || e.key === '+') { e.preventDefault(); imprimirTicket('ticket_print_area'); return; }
+    }
+    
+    if (document.getElementById('modalVisor').style.display === 'block') { 
+        if (e.key === 'Enter') { e.preventDefault(); cerrarModales(); return; }
+        if (e.key === 'ArrowRight') { e.preventDefault(); navVisor(1); return; }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); navVisor(-1); return; }
+        if (e.key.toLowerCase() === 'p') { e.preventDefault(); imprimirTicket('visor_print_area'); return; }
+        if (e.key === 'Delete') { e.preventDefault(); anularVentaVisor(); return; }
+    }
+    
+    if (document.getElementById('modalPromoAgotada').style.display === 'block') { 
+        if (e.key === 'Enter') { e.preventDefault(); cerrarModales(); return; }
+    }
+    
+    if (document.getElementById('modalMovimiento').style.display === 'block') { 
+        if (e.key === 'Enter') { e.preventDefault(); guardarMovimiento(); return; }
     }
 
     // 5. TECLAS DE FUNCIÓN
-    if(e.key === 'F12' && document.getElementById('v-tab').style.display === 'block') { e.preventDefault(); abrirCobro(); }
+  if(e.key === 'F12') { 
+        e.preventDefault(); 
+        if(document.getElementById('v-tab').style.display === 'block') abrirCobro(); 
+        if(document.getElementById('c-tab').style.display === 'block') finalizarCompra(); 
+    }
     if(e.key === 'F9' && document.getElementById('v-tab').style.display === 'block') { e.preventDefault(); abrirVisorTickets(); }
     if(e.key === 'F8') { e.preventDefault(); preguntarPausar(); }
     if(e.key === 'F7') { 
@@ -4652,7 +4757,7 @@ function confirmarReiniciarInv() {
 }
 // ==============================================
 };
-function changeTab(e, id) { tabActual = id; document.querySelectorAll('.tabcontent').forEach(x => x.style.display = 'none'); document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active')); document.getElementById('btn_' + id).classList.add('active'); document.getElementById(id).style.display = 'block'; if(id==='v-tab')document.getElementById('v_cod').focus(); if(id==='r-tab') renderCorte(); if(id==='i-tab') renderI(); if(id === 'pro-tab') renderPromos(); 
+function changeTab(e, id) { tabActual = id; document.querySelectorAll('.tabcontent').forEach(x => x.style.display = 'none'); document.querySelectorAll('.t-btn').forEach(x => x.classList.remove('active')); document.getElementById('btn_' + id).classList.add('active'); document.getElementById(id).style.display = 'block'; if(id==='v-tab')document.getElementById('v_cod').focus();if(id === 'c-tab') document.getElementById('c_cod').focus(); if(id==='r-tab') renderCorte(); if(id==='i-tab') renderI(); if(id === 'pro-tab') renderPromos(); 
     if(id === 'cli-tab') renderClientes(); 
     if(id === 'prov-tab') renderProveedores();}
 function seleccionarBusqueda(cod) { 
@@ -5202,6 +5307,13 @@ function abrirHistorialCompras() {
     let hoy = new Date();
     let hace30Dias = new Date();
     hace30Dias.setDate(hoy.getDate() - 30);
+
+// 🔥 CORRECCIÓN ZONA HORARIA: Formatear en hora local (Latinoamérica)
+    let formatearLocal = (d) => {
+        let mes = String(d.getMonth() + 1).padStart(2, '0');
+        let dia = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${mes}-${dia}`;
+    };
     
     if(!document.getElementById('filtro_compra_inicio').value) {
         document.getElementById('filtro_compra_inicio').value = hace30Dias.toISOString().split('T')[0];
@@ -5946,6 +6058,30 @@ function seleccionarProdCaja(cod) {
     // Disparamos tu función existente para que confirme el producto y salte al siguiente cuadro
     buscarProdCaja(); 
 }
+// === DIRECTOR DE TRÁFICO DEL TECLADO PARA COMPRAS ===
+function focoC(e, nextId, prevId) {
+    // Si presiona Flecha Abajo o Enter (y no es un Select), avanza
+    if(e.key === 'Enter' || e.key === 'ArrowDown') {
+        if(e.key === 'ArrowDown' && e.target.tagName === 'SELECT') return; // Deja que el menú desplegable funcione
+        e.preventDefault();
+        
+        if(e.key === 'Enter' && nextId === 'add') {
+            manualAddToList();
+        } else if (nextId !== 'add') {
+            let nextEl = document.getElementById(nextId);
+            if (nextEl) { nextEl.focus(); if(nextEl.select) nextEl.select(); }
+        }
+    } 
+    // Si presiona Flecha Arriba, regresa a la casilla anterior
+    else if (e.key === 'ArrowUp' && prevId) {
+        if(e.target.tagName === 'SELECT') return;
+        e.preventDefault();
+        let prevEl = document.getElementById(prevId);
+        if (prevEl) { prevEl.focus(); if(prevEl.select) prevEl.select(); }
+    }
+}
 </script>
 </body>
 </html>
+    
+
